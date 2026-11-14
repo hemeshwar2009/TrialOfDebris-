@@ -2,6 +2,8 @@
 
 A declassified spacecraft forensic investigation platform designed in the retro CRT aesthetic of **AFTERLIGHT (NASA Space Apps Challenge 2026: Abandoned But Not Forgotten)**.
 
+**▶ Play it live:** https://hemeshwar2009.github.io/TrialOfDebris-/
+
 ---
 
 ## 🎨 Visual Theme & Typography (Afterlight Aesthetic)
@@ -100,6 +102,37 @@ Matches the retro cybernetic pixel interface from the mission briefing specifica
 
 ---
 
+## ☁️ Cloud Save (Supabase)
+
+Mission progress syncs to the **TrialOfDebris** Supabase project, so it survives clearing the browser's storage.
+
+* Each visitor is signed in **anonymously** — no account or password needed.
+* Solved missions are stored in the `player_progress` table, one row per player. **Row-level security** lets each player read and write only their own row.
+* The browser's `localStorage` stays as an offline fallback — the game plays the same if Supabase can't be reached.
+* The header pill shows the status: `☁ CLOUD: CONNECTING`, `☁ CLOUD: SAVED` or `☁ CLOUD: OFFLINE`.
+
+Files:
+* [`js/cloud-sync.js`](js/cloud-sync.js) — the Supabase connection. It uses the project's **publishable** key, which is safe in a browser because access is limited by row-level security.
+* [`supabase/player_progress.sql`](supabase/player_progress.sql) — creates the table and policies. To set up a fresh project, run it in the Supabase SQL Editor and turn on **Authentication → Sign In / Providers → Allow anonymous sign-ins**.
+
+> The **Operator Login** card is a themed entry screen: the name typed there is shown in the header, but it does not create a Supabase account. Cloud save works the same for guests and operators.
+
+---
+
 ## 🚀 How to Run
 
-Double-click `index.html` to open in any web browser. Completely offline, zero dependencies, no installation required.
+**Easiest:** open the live site — https://hemeshwar2009.github.io/TrialOfDebris-/
+
+**Locally:** no build step or installation. Serve the folder with any static web server, for example:
+
+```bash
+npx http-server . -p 8080
+```
+
+then open http://localhost:8080. (Double-clicking `index.html` also works in most browsers.)
+
+An internet connection is needed for the pixel fonts, three.js (HELIX-7) and Supabase cloud save. If Supabase can't be reached, progress is still saved in the browser and the pill shows `☁ CLOUD: OFFLINE`.
+
+## 🌐 Deploying
+
+GitHub Pages serves the `gh-pages` branch. After updating the site, push to both `main` and `gh-pages`.
