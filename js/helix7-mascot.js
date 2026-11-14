@@ -51,6 +51,16 @@ class Helix7Mascot {
     this.followY = window.innerHeight - 200;
     this.widget = null;
     this.container = null;
+    this.holoBox = null;
+
+    // Click & Drag Placement State
+    this.isDragging = false;
+    this.isMouseDown = false;
+    this.dragStartX = 0;
+    this.dragStartY = 0;
+    this.dragOffsetX = 0;
+    this.dragOffsetY = 0;
+    this.suppressClick = false;
 
     // Mouse tracking
     this.mouse = { x: 0, y: 0 };
@@ -111,6 +121,7 @@ class Helix7Mascot {
     // 7. Event Listeners & DOM references
     this.widget = document.getElementById('helix7-widget');
     this.container = document.getElementById('helix7-droid-container');
+    this.holoBox = document.getElementById('bb8-holo-box');
 
     window.addEventListener('mousemove', this.onMouseMove, { passive: true });
     this.canvas.addEventListener('click', this.onCanvasClick);
@@ -118,6 +129,9 @@ class Helix7Mascot {
     if (this.container) {
       this.container.addEventListener('dblclick', this.onCanvasDblClick);
     }
+
+    // Initialize Click & Drag Screen Placement
+    this.initDraggable();
     
     try {
       const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -444,6 +458,10 @@ class Helix7Mascot {
   }
 
   onCanvasClick() {
+    if (this.suppressClick) {
+      this.suppressClick = false;
+      return;
+    }
     this.jumpAndSpin();
     
     // Trigger companion conversation or holographic tip
@@ -491,12 +509,159 @@ class Helix7Mascot {
   dockToCorner() {
     this.isFollowingCursor = false;
     if (this.widget) {
-      this.widget.classList.remove('following-cursor');
+      this.widget.classList.remove('following-cursor', 'dock-left', 'dock-top', 'is-dragging');
       this.widget.style.left = '';
       this.widget.style.top = '';
       this.widget.style.right = '22px';
       this.widget.style.bottom = '18px';
     }
+  }
+
+  initDraggable() {
+    this.widget = document.getElementById('helix7-widget');
+    this.container = document.getElementById('helix7-droid-container');
+    this.holoBox = document.getElementById('bb8-holo-box');
+
+    const onPointerDown = (e) => {
+      // Don't drag if clicking interactive buttons inside chat box
+      if (e.target && (e.target.closest('.bb8-icon-btn') || e.target.closest('button') || e.target.tagName === 'BUTTON')) {
+        return;
+      }
+
+      // Only handle primary button for mouse
+      if (e.button !== undefined && e.button !== 0) return;
+
+      const isTouch = Boolean(e.touches && e.touches.length > 0);
+      const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+      const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+
+      if (!this.widget) this.widget = document.getElementById('helix7-widget');
+      if (!this.widget) return;
+
+      const rect = this.widget.getBoundingClientRect();
+
+      this.isMouseDown = true;
+      this.dragStartX = clientX;
+      this.dragStartY = clientY;
+      this.dragOffsetX = clientX - rect.left;
+      this.dragOffsetY = clientY - rect.top;
+
+      // Cancel cursor follow if active, since operator is manually placing it
+      if (this.isFollowingCursor) {
+        this.isFollowingCursor = false;
+        this.widget.classList.remove('following-cursor');
+      }
+
+      window.addEventListener('mousemove', onPointerMove, { passive: false });
+      window.addEventListener('mouseup', onPointerUp);
+      window.addEventListener('touchmove', onPointerMove, { passive: false });
+      window.addEventListener('touchend', onPointerUp);
+      window.addEventListener('touchcancel', onPointerUp);
+    };
+
+    const onPointerMove = (e) => {
+      if (!this.isMouseDown) return;
+
+      const isTouch = Boolean(e.touches && e.touches.length > 0);
+      const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+      const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+
+      const dist = Math.hypot(clientX - this.dragStartX, clientY - this.dragStartY);
+
+      if (!this.isDragging && dist > 5) {
+        this.isDragging = true;
+        this.widget.classList.add('is-dragging');
+        document.body.classList.add('is-dragging-mascot');
+      }
+
+      if (this.isDragging) {
+        if (e.cancelable) e.preventDefault();
+
+        const widgetRect = this.widget.getBoundingClientRect();
+        const newLeft = clientX - this.dragOffsetX;
+        const newTop = clientY - this.dragOffsetY;
+
+        // Keep inside screen viewport
+        const maxLeft = Math.max(0, window.innerWidth - widgetRect.width);
+        const maxTop = Math.max(0, window.innerHeight - widgetRect.height);
+        const clampLeft = Math.max(0, Math.min(maxLeft, newLeft));
+        const clampTop = Math.max(0, Math.min(maxTop, newTop));
+
+        this.widget.style.left = `${clampLeft.toFixed(1)}px`;
+        this.widget.style.top = `${clampTop.toFixed(1)}px`;
+        this.widget.style.right = 'auto';
+        this.widget.style.bottom = 'auto';
+
+        // Adapt holographic chat orientation depending on placement on screen
+        if (clampLeft < 340) {
+          this.widget.classList.add('dock-left');
+        } else {
+          this.widget.classList.remove('dock-left');
+        }
+
+        if (clampTop < 200) {
+          this.widget.classList.add('dock-top');
+        } else {
+          this.widget.classList.remove('dock-top');
+        }
+      }
+    };
+
+    const onPointerUp = () => {
+      this.isMouseDown = false;
+
+      window.removeEventListener('mousemove', onPointerMove);
+      window.removeEventListener('mouseup', onPointerUp);
+      window.removeEventListener('touchmove', onPointerMove);
+      window.removeEventListener('touchend', onPointerUp);
+      window.removeEventListener('touchcancel', onPointerUp);
+
+      if (this.isDragging) {
+        this.isDragging = false;
+        this.widget.classList.remove('is-dragging');
+        document.body.classList.remove('is-dragging-mascot');
+
+        // Play gentle audio settle chime
+        if (window.soundEngine && typeof window.soundEngine.playTone === 'function') {
+          window.soundEngine.playTone(840, 0.05);
+        }
+
+        // Celebrate landing at new coordinates with a quick happy hop
+        this.jumpAndSpin();
+
+        // Suppress follow-up click event
+        this.suppressClick = true;
+        setTimeout(() => {
+          this.suppressClick = false;
+        }, 120);
+      }
+    };
+
+    if (this.container) {
+      this.container.addEventListener('mousedown', onPointerDown);
+      this.container.addEventListener('touchstart', onPointerDown, { passive: true });
+    }
+    if (this.holoBox) {
+      this.holoBox.addEventListener('mousedown', onPointerDown);
+      this.holoBox.addEventListener('touchstart', onPointerDown, { passive: true });
+    }
+
+    // Window resize handler to keep positioned widget in viewport
+    window.addEventListener('resize', () => {
+      if (this.widget && this.widget.style.left && this.widget.style.left !== 'auto') {
+        const widgetRect = this.widget.getBoundingClientRect();
+        const maxLeft = Math.max(0, window.innerWidth - widgetRect.width);
+        const maxTop = Math.max(0, window.innerHeight - widgetRect.height);
+        const curLeft = parseFloat(this.widget.style.left) || 0;
+        const curTop = parseFloat(this.widget.style.top) || 0;
+
+        const clampLeft = Math.max(0, Math.min(maxLeft, curLeft));
+        const clampTop = Math.max(0, Math.min(maxTop, curTop));
+
+        this.widget.style.left = `${clampLeft}px`;
+        this.widget.style.top = `${clampTop}px`;
+      }
+    });
   }
 
   jumpAndSpin() {
@@ -661,7 +826,7 @@ class Helix7Mascot {
     // ==========================================
     // 8. Cursor Companion Floating Follow
     // ==========================================
-    if (this.isFollowingCursor && this.widget) {
+    if (this.isFollowingCursor && this.widget && !this.isDragging) {
       const targetX = this.lastCursorX + 18;
       const targetY = this.lastCursorY - 95;
       

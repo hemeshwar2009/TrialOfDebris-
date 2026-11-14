@@ -2590,3 +2590,59 @@ body.high-contrast .crt-overlay {
     filter: drop-shadow(0 0 20px rgba(244, 114, 182, 0.85)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.85));
   }
 }
+
+/* ========================================================
+   CLICK & DRAG SCREEN PLACEMENT FOR CHATBOT WIDGET
+   ======================================================== */
+.helix7-droid-container {
+  cursor: grab !important;
+}
+
+.bb8-holo-header {
+  cursor: grab;
+  user-select: none;
+}
+
+.helix7-widget.is-dragging {
+  cursor: grabbing !important;
+  transition: none !important;
+  filter: drop-shadow(0 16px 36px rgba(0, 240, 255, 0.75)) drop-shadow(0 0 25px rgba(139, 92, 246, 0.65)) !important;
+  transform: scale(1.03);
+}
+
+.helix7-widget.is-dragging .helix7-droid-container,
+.helix7-widget.is-dragging .bb8-holo-box {
+  cursor: grabbing !important;
+  transition: none !important;
+}
+
+body.is-dragging-mascot,
+body.is-dragging-mascot * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+/* Adaptive Holographic Chat Placement */
+.helix7-widget .bb8-holo-box {
+  bottom: 182px;
+}
+
+.helix7-widget.dock-left {
+  align-items: flex-start !important;
+}
+
+.helix7-widget.dock-left .bb8-holo-box {
+  right: auto !important;
+  left: 0 !important;
+  transform-origin: bottom left !important;
+}
+
+.helix7-widget.dock-top .bb8-holo-box {
+  bottom: auto !important;
+  top: 185px !important;
+  transform-origin: top right !important;
+}
+
+.helix7-widget.dock-top.dock-left .bb8-holo-box {
+  transform-origin: top left !important;
+}
