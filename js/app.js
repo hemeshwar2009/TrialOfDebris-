@@ -7,8 +7,8 @@
  */
 
 /**
- * NASA SPACE LEGACY - BB-8 Companion Droid Controller
- * Interactive plaything astromech bot with flashlight projector & typewriter hologram speech
+ * NASA SPACE LEGACY - ARGUS Companion Probe Controller
+ * Interactive plaything recon bot with flashlight projector & typewriter hologram speech
  */
 class BB8CompanionController {
   constructor() {
@@ -19,10 +19,19 @@ class BB8CompanionController {
     this.droidEl = null;
     this.headEl = null;
     this.bodyEl = null;
+    this.eyeEl = null;
+    this.mascot3D = null;
 
     this.typeInterval = null;
     this.isTyping = false;
     this.isHoloVisible = true;
+    this.isBusyAction = false;
+
+    this.cursorHistory = [];
+    this.trackingTimer = null;
+    this.lastProximityCommandTime = 0;
+    this.lastHoverZone = null;
+    this.hoverZoneTimer = null;
 
     this.tips = [
       "BEEP-BOOP! Did you know? Opportunity drove over 28 miles across Mars, surviving 55 times longer than its 90-day design warranty!",
@@ -39,18 +48,254 @@ class BB8CompanionController {
   }
 
   init() {
-    this.widget = document.getElementById('bb8-companion-widget');
+    this.widget = document.getElementById('helix7-widget') || document.getElementById('bb8-companion-widget');
     this.holoBox = document.getElementById('bb8-holo-box');
     this.textEl = document.getElementById('bb8-message-text');
     this.beamCone = document.getElementById('bb8-beam-cone');
-    this.droidEl = document.getElementById('bb8-droid');
+    this.droidEl = document.getElementById('helix7-droid-container') || document.getElementById('bb8-droid');
     this.headEl = document.getElementById('bb8-head');
     this.bodyEl = document.getElementById('bb8-body');
+    this.eyeEl = document.getElementById('bb8-eye-pupil');
 
-    // Initial greeting
-    setTimeout(() => {
-      this.say("BEEP-BOOP! Tactical Astromech BB-8 online! Ready to assist your forensic space investigation! Tap me anytime for clues!", "happy");
-    }, 900);
+    // Initialize Three.js 3D Mascot HELIX-7
+    this.init3DMascot();
+
+    // Attach smooth mouse cursor movement tracking
+    window.addEventListener('mousemove', (e) => this.handleMouseMove(e), { passive: true });
+    window.addEventListener('mouseleave', () => this.handleMouseLeave());
+  }
+
+  init3DMascot() {
+    if (this.mascot3D) return;
+    const canvas = document.getElementById('helix7-canvas');
+    if (canvas && typeof Helix7Mascot !== 'undefined') {
+      try {
+        this.mascot3D = new Helix7Mascot('helix7-canvas');
+        window.helix7Mascot = this.mascot3D;
+      } catch (err) {
+        console.warn('HELIX-7 3D initialization:', err);
+      }
+    }
+  }
+
+  handleMouseMove(e) {
+    if (!this.headEl || !this.droidEl || this.isBusyAction) return;
+
+    const now = Date.now();
+    const rect = this.headEl.getBoundingClientRect();
+    const headX = rect.left + rect.width / 2;
+    const headY = rect.top + rect.height / 2;
+    const dx = e.clientX - headX;
+    const dy = e.clientY - headY;
+    const dist = Math.hypot(dx, dy);
+
+    // Record cursor trajectory for funny gesture detection
+    this.cursorHistory.push({ x: e.clientX, y: e.clientY, time: now, dx, dy, dist });
+    if (this.cursorHistory.length > 16) this.cursorHistory.shift();
+    this.cursorHistory = this.cursorHistory.filter(pt => now - pt.time < 800);
+
+    // Check funny gestures (tickle, startle, dizzy spin)
+    if (this.checkFunnyGestures(e, dist, now)) {
+      return;
+    }
+
+    // Active cursor tracking mode
+    this.droidEl.classList.add('bb8-tracking');
+    clearTimeout(this.trackingTimer);
+    this.trackingTimer = setTimeout(() => {
+      if (this.droidEl && !this.isBusyAction) {
+        this.droidEl.classList.remove('bb8-tracking');
+        this.headEl.style.transform = '';
+        if (this.eyeEl) this.eyeEl.style.transform = '';
+      }
+    }, 2800);
+
+    // Natural head tilt and pitch angle clamp toward cursor
+    const screenW = Math.max(window.innerWidth, 800);
+    const screenH = Math.max(window.innerHeight, 600);
+    const tilt = Math.max(-28, Math.min(28, (dx / (screenW * 0.7)) * 36));
+    const pitch = Math.max(-4, Math.min(3, (dy / (screenH * 0.7)) * 7));
+
+    this.headEl.style.transform = `rotate(${tilt.toFixed(1)}deg) translateY(${pitch.toFixed(1)}px)`;
+
+    // Shift eye pupil toward cursor
+    if (this.eyeEl && dist > 8) {
+      const pupilX = Math.max(-1.8, Math.min(1.8, (dx / dist) * 1.8));
+      const pupilY = Math.max(-1.3, Math.min(1.3, (dy / dist) * 1.3));
+      this.eyeEl.style.transform = `translate(${pupilX.toFixed(2)}px, ${pupilY.toFixed(2)}px)`;
+    }
+
+    // Check proximity to nearby menus and give tactical commands
+    this.checkNearbyMenuProximity(e, now);
+  }
+
+  handleMouseLeave() {
+    if (this.droidEl && !this.isBusyAction) {
+      this.droidEl.classList.remove('bb8-tracking');
+      if (this.headEl) this.headEl.style.transform = '';
+      if (this.eyeEl) this.eyeEl.style.transform = '';
+    }
+  }
+
+  checkFunnyGestures(e, dist, now) {
+    if (this.isBusyAction || this.cursorHistory.length < 5) return false;
+
+    // 1. Tickle Action: fast back-and-forth scrubbing directly over the bot (dist < 65px)
+    if (dist < 65) {
+      let directionChanges = 0;
+      for (let i = 2; i < this.cursorHistory.length; i++) {
+        const d1 = this.cursorHistory[i-1].x - this.cursorHistory[i-2].x;
+        const d2 = this.cursorHistory[i].x - this.cursorHistory[i-1].x;
+        if ((d1 > 4 && d2 < -4) || (d1 < -4 && d2 > 4)) {
+          directionChanges++;
+        }
+      }
+      if (directionChanges >= 4) {
+        this.playFunnyAction('tickle');
+        return true;
+      }
+    }
+
+    // 2. Startled Action: cursor was far (> 280px) and suddenly darted into < 45px!
+    const oldSample = this.cursorHistory[0];
+    if (oldSample && oldSample.dist > 280 && dist < 45 && (now - oldSample.time) < 250) {
+      this.playFunnyAction('startle');
+      return true;
+    }
+
+    // 3. Dizzy Action: rapid circular mouse movement near bot (within 150px, speed > 1350px/s)
+    if (dist < 150) {
+      let totalDist = 0;
+      for (let i = 1; i < this.cursorHistory.length; i++) {
+        totalDist += Math.hypot(
+          this.cursorHistory[i].x - this.cursorHistory[i-1].x,
+          this.cursorHistory[i].y - this.cursorHistory[i-1].y
+        );
+      }
+      const timeDelta = (now - this.cursorHistory[0].time) / 1000;
+      const speed = timeDelta > 0 ? totalDist / timeDelta : 0;
+      if (speed > 1350 && totalDist > 320) {
+        this.playFunnyAction('dizzy');
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  playFunnyAction(type) {
+    if (this.isBusyAction || !this.droidEl) return;
+    this.isBusyAction = true;
+    this.cursorHistory = [];
+    this.droidEl.classList.remove('bb8-tracking', 'bb8-dizzy', 'bb8-startled', 'bb8-tickle', 'bb8-peek');
+    void this.droidEl.offsetWidth; // force reflow
+
+    if (type === 'tickle') {
+      this.droidEl.classList.add('bb8-tickle');
+      if (window.soundEngine?.playDroidTickle) window.soundEngine.playDroidTickle();
+      const tickleLines = [
+        "HEHE-BZZT-CHIRP! Stop that! That tickles my anti-gravity exhaust ports!",
+        "GIGGLE-CHIRP! Warning: Forensic detective is tickling my chassis sensors!",
+        "BOOP-HEHEHE! That is an unauthorized tactile diagnostic test!"
+      ];
+      this.say(tickleLines[Math.floor(Math.random() * tickleLines.length)], "happy");
+      setTimeout(() => {
+        if (this.droidEl) this.droidEl.classList.remove('bb8-tickle');
+        this.isBusyAction = false;
+      }, 1300);
+    } else if (type === 'dizzy') {
+      this.droidEl.classList.add('bb8-dizzy');
+      if (window.soundEngine?.playDroidDizzy) window.soundEngine.playDroidDizzy();
+      const dizzyLines = [
+        "WHOA-BZZT! Rapid cursor orbit detected! Gyroscopic compass overload! I'm getting dizzy!",
+        "GYRO MALFUNCTION! *WHEEEE* Too fast! My orbital telemetry is spinning 720 degrees!",
+        "BZZZT-WHOAAA! Are you trying to hypnotize my navigation matrix?!"
+      ];
+      this.say(dizzyLines[Math.floor(Math.random() * dizzyLines.length)], "curious");
+      setTimeout(() => {
+        if (this.droidEl) this.droidEl.classList.remove('bb8-dizzy');
+        this.isBusyAction = false;
+      }, 1700);
+    } else if (type === 'startle') {
+      this.droidEl.classList.add('bb8-startled');
+      if (window.soundEngine?.playDroidStartle) window.soundEngine.playDroidStartle();
+      const startleLines = [
+        "BEEP-EEK! Don't sneak up on an autonomous recon probe! My collision radar almost panicked!",
+        "WHOA-JUMP! High-velocity pointer dive! Keep a safe 10-centimeter clearance!",
+        "BOOP-GASP! Incoming cursor projectile! Defensive shielding nearly deployed!"
+      ];
+      this.say(startleLines[Math.floor(Math.random() * startleLines.length)], "curious");
+      setTimeout(() => {
+        if (this.droidEl) this.droidEl.classList.remove('bb8-startled');
+        this.isBusyAction = false;
+      }, 900);
+    }
+  }
+
+  checkNearbyMenuProximity(e, now) {
+    // 8-second cooldown between proactive menu commands
+    if (this.isTyping || now - this.lastProximityCommandTime < 8000) return;
+
+    const zones = [
+      {
+        id: 'holo-controls',
+        el: this.holoBox,
+        pad: 40,
+        cmd: "COMMAND DIRECTIVE: Forensic Holo-Deck in range! Click [💬] for declassified intel or [×] to toggle telemetry log!"
+      },
+      {
+        id: 'top-controls',
+        el: document.querySelector('.header-controls-group'),
+        pad: 35,
+        cmd: "SYSTEMS COMMAND: Hardware monitor controls detected! Adjust CRT scanlines, toggle sound synth, or open Mission Tree!"
+      },
+      {
+        id: 'nav-tabs',
+        el: document.getElementById('main-nav-tabs'),
+        pad: 30,
+        cmd: "NAVIGATION COMMAND: Sector routing matrix nearby! Select Destination, Case Board, or Mission Tree to chart course!"
+      },
+      {
+        id: 'workbench-tabs',
+        el: document.querySelector('.workbench-tabs-row'),
+        pad: 35,
+        cmd: "DIAGNOSTIC PROTOCOL: Hardware workbench active! Switch tabs to inspect Schematics, run Simulators, or submit your Verdict!"
+      },
+      {
+        id: 'destination-cards',
+        el: document.querySelector('.destinations-grid'),
+        pad: 40,
+        cmd: "SECTOR DIRECTIVE: Mission dossiers in telemetry lock! Select Mars or Moon sector to examine abandoned explorers!"
+      }
+    ];
+
+    let matchedZone = null;
+    for (const zone of zones) {
+      if (!zone.el || zone.el.offsetParent === null) continue;
+      const r = zone.el.getBoundingClientRect();
+      if (
+        e.clientX >= r.left - zone.pad &&
+        e.clientX <= r.right + zone.pad &&
+        e.clientY >= r.top - zone.pad &&
+        e.clientY <= r.bottom + zone.pad
+      ) {
+        matchedZone = zone;
+        break;
+      }
+    }
+
+    if (matchedZone && matchedZone.id !== this.lastHoverZone) {
+      clearTimeout(this.hoverZoneTimer);
+      this.hoverZoneTimer = setTimeout(() => {
+        if (!this.isTyping && Date.now() - this.lastProximityCommandTime >= 7000) {
+          this.lastHoverZone = matchedZone.id;
+          this.lastProximityCommandTime = Date.now();
+          this.say(matchedZone.cmd, "curious");
+        }
+      }, 350);
+    } else if (!matchedZone) {
+      clearTimeout(this.hoverZoneTimer);
+    }
   }
 
   toggleHolo() {
@@ -68,7 +313,9 @@ class BB8CompanionController {
   }
 
   interact() {
-    if (this.droidEl) {
+    if (this.mascot3D) {
+      this.mascot3D.jumpAndSpin();
+    } else if (this.droidEl) {
       this.droidEl.classList.remove('bb8-happy-spin');
       void this.droidEl.offsetWidth; // trigger reflow
       this.droidEl.classList.add('bb8-happy-spin');
@@ -81,6 +328,12 @@ class BB8CompanionController {
 
   say(message, mood = "chirp") {
     if (!this.textEl) return;
+
+    // Trigger 3D Mascot talking mode
+    if (this.mascot3D) {
+      this.mascot3D.setTalking(true);
+      if (mood === 'happy') this.mascot3D.jumpAndSpin();
+    }
 
     // Ensure holo box is visible
     if (this.holoBox && this.holoBox.classList.contains('minimized')) {
@@ -142,6 +395,9 @@ class BB8CompanionController {
         clearInterval(this.typeInterval);
         this.typeInterval = null;
         this.isTyping = false;
+        if (this.mascot3D) {
+          this.mascot3D.setTalking(false);
+        }
       }
     }, 22);
   }
@@ -226,6 +482,7 @@ class SpaceLegacyApp {
 
     this.bb8Bot = new BB8CompanionController();
     window.bb8Bot = this.bb8Bot;
+    window.helix7Bot = this.bb8Bot;
     this.bb8Bot.init();
 
     this.updateOverallProgressStats();
@@ -233,10 +490,77 @@ class SpaceLegacyApp {
     // Render Tree Matrix
     this.renderTreeMatrix();
 
-    // Start on Screen 1: Destination
-    this.goToScreen('destination');
+    // Start on Screen 0: Opening Page ("landing")
+    this.goToScreen('landing');
+
+    // Allow pressing Enter key on landing page to direct straight to main page
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const landingEl = document.getElementById('screen-landing');
+        if (landingEl && !landingEl.classList.contains('hidden')) {
+          this.enterMainPage();
+        }
+      }
+    });
 
     this.initCloudSync();
+  }
+
+  getSolvedTotal() {
+    const countSolved = (destKey) => {
+      const d = (this.savedProgress && this.savedProgress[destKey]) || {};
+      const s = (d.starter?.solved || []).length;
+      const m = (d.middle?.solved || []).length;
+      const a = (d.advanced?.solved || []).length;
+      return s + m + a;
+    };
+    return countSolved('mars') + countSolved('moon');
+  }
+
+  enterMainPage() {
+    this.authenticateUser('Guest Investigator', true);
+  }
+
+  handleAuthSubmit(e) {
+    if (e) e.preventDefault();
+    const emailInput = document.getElementById('login-email');
+    const email = emailInput && emailInput.value ? emailInput.value.trim() : 'investigator@nasa.gov';
+    this.authenticateUser(email, false);
+  }
+
+  handleGuestLogin() {
+    this.authenticateUser('Guest Investigator', true);
+  }
+
+  authenticateUser(identifier, isGuest = false) {
+    if (window.soundEngine && window.soundEngine.playSuccess) {
+      window.soundEngine.playSuccess();
+    }
+
+    const rankBadge = document.getElementById('player-rank-pill');
+    if (rankBadge) {
+      const userDisplay = isGuest ? 'GUEST RECON' : identifier.split('@')[0].toUpperCase();
+      const solvedCount = typeof this.getSolvedTotal === 'function' ? this.getSolvedTotal() : 0;
+      rankBadge.innerHTML = `👤 ${userDisplay} | <span id="solved-count-badge">${solvedCount}/24 SOLVED</span>`;
+    }
+
+    const rankLabel = document.getElementById('player-rank');
+    if (rankLabel) {
+      rankLabel.textContent = isGuest ? 'RANK: GUEST CADET' : `RANK: ${identifier.split('@')[0].toUpperCase()}`;
+    }
+
+    // Direct into the main mission briefing screen of the project
+    this.goToScreen('destination');
+
+    // HELIX-7 Mascot Welcome Greeting
+    if (this.bb8Bot) {
+      setTimeout(() => {
+        const msg = isGuest
+          ? "BEEP-CHIRP! 3D Droid mascot HELIX-7 online! Guest clearance recognized! Reopening abandoned explorer dossiers!"
+          : `WHEEE-CHIRP! 3D Droid mascot HELIX-7 online! Welcome back, Investigator ${identifier.split('@')[0]}! Tactical forensic systems armed!`;
+        this.bb8Bot.say(msg, "happy");
+      }, 700);
+    }
   }
 
   // Pull cloud-saved progress from Supabase and merge it with this browser's copy.
@@ -294,7 +618,7 @@ class SpaceLegacyApp {
   goToScreen(screenId) {
     window.soundEngine.playClick();
 
-    const screens = ['tree', 'destination', 'depth', 'levels', 'game'];
+    const screens = ['landing', 'login', 'tree', 'destination', 'depth', 'levels', 'game'];
     screens.forEach(s => {
       const el = document.getElementById(`screen-${s}`);
       if (el) el.classList.add('hidden');
@@ -302,6 +626,30 @@ class SpaceLegacyApp {
 
     const targetEl = document.getElementById(`screen-${screenId}`);
     if (targetEl) targetEl.classList.remove('hidden');
+
+    // Header, Nav tabs, and Mascot Widget visibility control
+    const headerEl = document.querySelector('.retro-header-frame');
+    const navBarEl = document.getElementById('main-nav-tabs');
+    const mascotWidget = document.getElementById('helix7-widget') || document.getElementById('bb8-companion-widget');
+
+    if (screenId === 'landing' || screenId === 'login') {
+      if (headerEl) headerEl.classList.add('hidden');
+      if (navBarEl) navBarEl.classList.add('hidden');
+      if (mascotWidget) mascotWidget.style.display = 'none';
+      if (this.bb8Bot && this.bb8Bot.mascot3D && typeof this.bb8Bot.mascot3D.dockToCorner === 'function') {
+        this.bb8Bot.mascot3D.dockToCorner();
+      }
+      return;
+    } else {
+      if (headerEl) headerEl.classList.remove('hidden');
+      if (navBarEl) navBarEl.classList.remove('hidden');
+      if (mascotWidget) mascotWidget.style.display = 'flex';
+
+      // Ensure 3D mascot initialized
+      if (this.bb8Bot && !this.bb8Bot.mascot3D) {
+        this.bb8Bot.init3DMascot();
+      }
+    }
 
     // Update main nav tab styling
     const navTabs = [
@@ -326,7 +674,7 @@ class SpaceLegacyApp {
       this.renderTreeMatrix();
     }
 
-    // BB-8 Astromech Reactive Commentary on Block Shift
+    // ARGUS Probe Reactive Commentary on Block Shift
     if (this.bb8Bot && screenId !== 'game') {
       const messages = {
         destination: "BEEP-BOOP! Welcome to the forensic archive! Select Mars or Moon to begin investigating abandoned explorers!",

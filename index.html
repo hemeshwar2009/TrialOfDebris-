@@ -40,6 +40,7 @@
         <button id="toggle-crt-btn" class="pixel-pill pill-action-btn">📺 CRT: ON</button>
         <button id="toggle-contrast-btn" class="pixel-pill pill-action-btn">◉ CONTRAST: NORM</button>
         <button id="btn-signin" class="pixel-pill pill-purple" onclick="window.gameApp.toggleTreeView()">🔑 MISSION TREE</button>
+        <button id="btn-logout" class="pixel-pill pill-offline pill-action-btn" onclick="window.gameApp.goToScreen('landing')" title="Exit archive and return to title">🚪 TITLE</button>
       </div>
     </header>
 
@@ -62,9 +63,176 @@
     </nav>
 
     <!-- ========================================================
+         PAGE 0-A: OPENING LANDING HERO PAGE ("TrailOfDebris")
+         ======================================================== -->
+    <section id="screen-landing" class="screen-view landing-screen">
+      <div class="landing-content-wrap">
+        <!-- Animated TrailOfDebris Logo with Broken Hardware Orbiting Corner with Tail -->
+        <div class="debris-hero-logo-card" onclick="window.gameApp.enterMainPage()" role="button" tabindex="0" title="Click to Enter Main Project">
+          <div class="orbit-corner-system" aria-hidden="true">
+            <!-- Glowing Comet / Orbit Tail SVG -->
+            <svg class="orbit-tail-svg" viewBox="0 0 320 200">
+              <defs>
+                <linearGradient id="cometTailGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#00f0ff" stop-opacity="0"/>
+                  <stop offset="45%" stop-color="#8b5cf6" stop-opacity="0.55"/>
+                  <stop offset="85%" stop-color="#22d3ee" stop-opacity="0.95"/>
+                  <stop offset="100%" stop-color="#ffffff" stop-opacity="1"/>
+                </linearGradient>
+                <filter id="cometGlow">
+                  <feGaussianBlur stdDeviation="3" result="blur"/>
+                  <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              <ellipse cx="230" cy="50" rx="75" ry="38" class="orbit-track-ellipse" stroke="url(#cometTailGrad)" stroke-width="2.6" fill="none" filter="url(#cometGlow)"/>
+            </svg>
+
+            <!-- Broken Hardware pieces revolving in the corner orbit -->
+            <div class="orbiting-hardware-group">
+              <div class="debris-piece shard-solar" title="Shattered solar array">
+                <svg viewBox="0 0 32 32">
+                  <polygon points="4,8 26,4 28,24 8,28" fill="#0f2b5c" stroke="#00f0ff" stroke-width="1.3"/>
+                  <line x1="15" y1="6" x2="18" y2="26" stroke="#22d3ee" stroke-width="0.8"/>
+                  <line x1="6" y1="18" x2="27" y2="14" stroke="#22d3ee" stroke-width="0.8"/>
+                </svg>
+              </div>
+              <div class="debris-piece shard-antenna" title="Severed telemetry mast">
+                <svg viewBox="0 0 28 28">
+                  <line x1="2" y1="26" x2="22" y2="4" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="22" cy="4" r="2.5" fill="#f43f5e"/>
+                  <path d="M 8 20 Q 14 16 18 22" fill="none" stroke="#facc15" stroke-width="1.2"/>
+                </svg>
+              </div>
+              <div class="debris-piece shard-chip" title="Silicon microchip wafer">
+                <svg viewBox="0 0 24 24">
+                  <rect x="5" y="5" width="14" height="14" rx="1.5" fill="#064e3b" stroke="#facc15" stroke-width="1"/>
+                  <rect x="9" y="9" width="6" height="6" fill="#0f172a"/>
+                  <line x1="3" y1="8" x2="5" y2="8" stroke="#facc15" stroke-width="1.2"/>
+                  <line x1="3" y1="12" x2="5" y2="12" stroke="#facc15" stroke-width="1.2"/>
+                  <line x1="3" y1="16" x2="5" y2="16" stroke="#facc15" stroke-width="1.2"/>
+                  <line x1="19" y1="8" x2="21" y2="8" stroke="#facc15" stroke-width="1.2"/>
+                  <line x1="19" y1="12" x2="21" y2="12" stroke="#facc15" stroke-width="1.2"/>
+                  <line x1="19" y1="16" x2="21" y2="16" stroke="#facc15" stroke-width="1.2"/>
+                </svg>
+              </div>
+              <div class="debris-piece shard-bolt" title="Titanium docking hex bolt">
+                <svg viewBox="0 0 20 20">
+                  <polygon points="10,2 17,6 17,14 10,18 3,14 3,6" fill="#334155" stroke="#94a3b8" stroke-width="1.2"/>
+                  <circle cx="10" cy="10" r="3.5" fill="#0b0520"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bold Animated "TrailOfDebris" Typography -->
+          <h1 class="debris-hero-title">
+            <span class="word-trail">TRAIL</span><span class="word-of">OF</span><span class="word-debris">DEBRIS</span>
+          </h1>
+          <p class="debris-hero-sub">NASA FORENSIC INVESTIGATION ARCHIVE // SPACE APPS 2026</p>
+          <div class="debris-badge-row">
+            <span class="debris-mini-tag">24 DECLASSIFIED CASES</span>
+            <span class="debris-mini-tag">HARDWARE TELEMETRY TRIAGE</span>
+            <span class="debris-mini-tag">ORBITAL FORENSICS</span>
+          </div>
+        </div>
+
+        <!-- Buttons to Enter or Log In -->
+        <div class="landing-login-action">
+          <button id="btn-enter-main" class="retro-btn pulse-btn main-enter-btn" onclick="window.gameApp.enterMainPage()" title="Click to enter the main project directly">
+            ⬡ CLICK TO ENTER ▶
+          </button>
+          <button id="btn-open-login" class="retro-btn sm-login-btn" onclick="window.gameApp.goToScreen('login')" title="Open login authorization card">
+            🔑 OPERATOR LOGIN
+          </button>
+        </div>
+        <p class="landing-enter-hint">[ CLICK TO ENTER OR PRESS ENTER KEY ]</p>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         PAGE 0-B: LOGIN AUTHENTICATION PAGE
+         ======================================================== -->
+    <section id="screen-login" class="screen-view login-screen">
+      <div class="login-page-wrap">
+        <!-- Animated logo above the login card -->
+        <div class="login-header-logo">
+          <div class="debris-hero-logo-card compact-logo" onclick="window.gameApp.enterMainPage()" role="button" tabindex="0" title="Click to Enter Main Project">
+            <div class="orbit-corner-system compact-orbit" aria-hidden="true">
+              <svg class="orbit-tail-svg" viewBox="0 0 320 200">
+                <ellipse cx="230" cy="50" rx="75" ry="38" class="orbit-track-ellipse" stroke="url(#cometTailGrad)" stroke-width="2" fill="none"/>
+              </svg>
+              <div class="orbiting-hardware-group">
+                <div class="debris-piece shard-solar sm"><svg viewBox="0 0 32 32"><polygon points="4,8 26,4 28,24 8,28" fill="#0f2b5c" stroke="#00f0ff" stroke-width="1.2"/></svg></div>
+                <div class="debris-piece shard-chip sm"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" fill="#064e3b" stroke="#facc15" stroke-width="1"/></svg></div>
+              </div>
+            </div>
+            <h2 class="debris-hero-title compact-title">
+              <span class="word-trail">TRAIL</span><span class="word-of">OF</span><span class="word-debris">DEBRIS</span>
+            </h2>
+            <p class="debris-hero-sub">ACCESS AUTHORIZATION GATEWAY</p>
+          </div>
+        </div>
+
+        <!-- The Login Card -->
+        <div class="retro-login-card">
+          <div class="login-card-badge">
+            <span class="badge-dot"></span> SECURITY LEVEL: CADET TO INVESTIGATOR
+          </div>
+          <h3 class="login-card-title">FORENSIC ARCHIVE AUTHENTICATION</h3>
+
+          <form id="auth-login-form" class="retro-login-form" onsubmit="window.gameApp.handleAuthSubmit(event)">
+            <div class="form-field-group">
+              <label for="login-email" class="retro-label">INVESTIGATOR EMAIL ID</label>
+              <div class="input-with-icon">
+                <span class="input-icon">✉</span>
+                <input type="email" id="login-email" class="retro-input-field" placeholder="cadet@afterlight.space" value="cadet@afterlight.space" required>
+              </div>
+            </div>
+
+            <div class="form-field-group">
+              <label for="login-password" class="retro-label">SECURITY PASSPHRASE</label>
+              <div class="input-with-icon">
+                <span class="input-icon">🔒</span>
+                <input type="password" id="login-password" class="retro-input-field" placeholder="••••••••••••" value="apollo13rescue" required>
+              </div>
+            </div>
+
+            <button type="submit" class="retro-btn pulse-btn full-btn auth-submit-btn">
+              AUTHENTICATE & ENTER ARCHIVE ▶
+            </button>
+          </form>
+
+          <div class="login-card-divider">
+            <span class="divider-line"></span>
+            <span class="divider-text">OR DIRECT ENTRY</span>
+            <span class="divider-line"></span>
+          </div>
+
+          <div class="login-alt-actions">
+            <button type="button" class="retro-btn guest-btn full-btn" onclick="window.gameApp.handleGuestLogin()">
+              🚀 ENTER AS GUEST ACCOUNT
+            </button>
+            <button type="button" class="retro-btn direct-enter-btn full-btn" onclick="window.gameApp.enterMainPage()">
+              ⚡ CLICK TO ENTER MAIN PAGE DIRECTLY
+            </button>
+          </div>
+
+          <div class="login-card-footer">
+            <button type="button" class="back-link-btn" onclick="window.gameApp.goToScreen('landing')">
+              ◀ RETURN TO TITLE
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
          PAGE 1: MISSION BRIEFING & SHOWCASE (MATCHING SCREENSHOT)
          ======================================================== -->
-    <main id="screen-destination" class="screen-view">
+    <main id="screen-destination" class="screen-view hidden">
       <div class="showcase-frame">
         <div style="text-align: center;">
           <div class="challenge-tag-pill">
@@ -417,16 +585,20 @@
   </div>
 
   <!-- ========================================================
-       CORNER PLAYTHING BOT: BB-8 COMPANION WITH FLASHLIGHT HOLO
+       CORNER PLAYTHING BOT: ARGUS COMPANION WITH FLASHLIGHT HOLO
        ======================================================== -->
-  <aside id="bb8-companion-widget" class="bb8-companion-widget" aria-label="BB-8 Astromech Companion Droid">
+  <!-- ========================================================
+       HELIX-7: INTERACTIVE 3D DROID MASCOT & FORENSIC CHAT
+       (Hidden on opening page and login page)
+       ======================================================== -->
+  <aside id="helix7-widget" class="helix7-widget" aria-label="HELIX-7 3D Droid Mascot" style="display: none;">
     <!-- Flashlight / Hologram Projector Beam Cone -->
     <div id="bb8-beam-cone" class="bb8-beam-cone"></div>
 
-    <!-- Hologram Dialog Speech Box -->
+    <!-- Hologram Dialog Speech / Chat Box -->
     <div id="bb8-holo-box" class="bb8-holo-box">
       <div class="bb8-holo-header">
-        <span class="bb8-holo-title"><i class="bb8-status-dot"></i> BB-8 ASTROMECH // FORENSIC LOG</span>
+        <span class="bb8-holo-title"><i class="bb8-status-dot"></i> HELIX-7 DROID // FORENSIC LOG</span>
         <div class="bb8-holo-actions">
           <button id="bb8-btn-chirp" class="bb8-icon-btn" title="Chirp / Tell Tip" onclick="window.bb8Bot.interact()">💬</button>
           <button id="bb8-btn-toggle" class="bb8-icon-btn" title="Toggle Log" onclick="window.bb8Bot.toggleHolo()">×</button>
@@ -436,97 +608,20 @@
         <span id="bb8-message-text" class="bb8-message-text"></span><span class="bb8-cursor">█</span>
       </div>
       <div class="bb8-holo-footer">
-        <span>CLICK BB-8 FOR HINTS & DECLASSIFIED LORE 💬</span>
+        <span>CLICK TO CHAT · DOUBLE-CLICK TO FOLLOW CURSOR 🚀</span>
       </div>
     </div>
 
-    <!-- Interactive Cute BB-8 Droid -->
-    <div id="bb8-droid" class="bb8-droid" onclick="window.bb8Bot.interact()" title="Click BB-8 to play & hear tips!">
-      <!-- Dome Head -->
-      <div class="bb8-head-wrap" id="bb8-head">
-        <svg class="bb8-head-svg" viewBox="0 0 70 45">
-          <!-- Antennas -->
-          <line x1="48" y1="12" x2="48" y2="0" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
-          <line x1="42" y1="12" x2="42" y2="5" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="48" cy="1" r="1.5" fill="#f97316"/>
-          
-          <!-- Dome Base -->
-          <path d="M 12 36 A 23 23 0 0 1 58 36 Z" fill="#f8fafc" stroke="#334155" stroke-width="1.5"/>
-          
-          <!-- Top Silver Cap / Radar Dome -->
-          <ellipse cx="35" cy="15" rx="15" ry="4" fill="#cbd5e1" stroke="#475569" stroke-width="1"/>
-          <ellipse cx="35" cy="14" rx="7" ry="2" fill="#f97316"/>
-          
-          <!-- Orange Lateral Stripes -->
-          <path d="M 14 30 Q 35 26 56 30 L 57 34 Q 35 30 13 34 Z" fill="#ea580c"/>
-          <rect x="22" y="27" width="5" height="4" fill="#f8fafc"/>
-          <rect x="43" y="27" width="5" height="4" fill="#f8fafc"/>
-
-          <!-- Primary Photoreceptor Eye (Large Dark Lens) -->
-          <circle cx="35" cy="22" r="7.5" fill="#0f172a" stroke="#cbd5e1" stroke-width="1.5"/>
-          <circle cx="35" cy="22" r="5" fill="#020617"/>
-          <circle cx="35" cy="22" r="2.5" fill="#ef4444" id="bb8-eye-pupil" class="bb8-pupil-glow"/>
-          <circle cx="37" cy="20" r="1.2" fill="#ffffff"/>
-
-          <!-- Secondary Projector Lens (Flashlight Emitter) -->
-          <circle cx="46" cy="26" r="4" fill="#1e293b" stroke="#64748b" stroke-width="1"/>
-          <circle cx="46" cy="26" r="2.5" fill="#00f0ff" id="bb8-projector-lens" class="bb8-lens-glow"/>
-
-          <!-- Bottom Neck Ring -->
-          <ellipse cx="35" cy="37" rx="24" ry="3.5" fill="#1e293b" stroke="#0f172a" stroke-width="1"/>
-        </svg>
-      </div>
-
-      <!-- Spherical Body -->
-      <div class="bb8-body-wrap" id="bb8-body">
-        <svg class="bb8-body-svg" viewBox="0 0 80 80">
-          <!-- Main White Sphere -->
-          <defs>
-            <radialGradient id="sphereGrad" cx="35%" cy="30%" r="70%">
-              <stop offset="0%" stop-color="#ffffff"/>
-              <stop offset="65%" stop-color="#f1f5f9"/>
-              <stop offset="100%" stop-color="#cbd5e1"/>
-            </radialGradient>
-            <linearGradient id="orangeGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#fb923c"/>
-              <stop offset="100%" stop-color="#ea580c"/>
-            </linearGradient>
-          </defs>
-
-          <circle cx="40" cy="40" r="38" fill="url(#sphereGrad)" stroke="#334155" stroke-width="1.8"/>
-
-          <!-- Central Iconic Orange Circle Panel (Tool Bay) -->
-          <circle cx="40" cy="40" r="21" fill="none" stroke="url(#orangeGrad)" stroke-width="7"/>
-          <circle cx="40" cy="40" r="14" fill="#e2e8f0" stroke="#475569" stroke-width="1"/>
-          
-          <!-- Inner Tool Bay Details -->
-          <rect x="35" y="32" width="10" height="4" fill="#334155"/>
-          <rect x="35" y="38" width="10" height="4" fill="#475569"/>
-          <rect x="35" y="44" width="10" height="4" fill="#334155"/>
-          <circle cx="40" cy="40" r="3" fill="#ea580c"/>
-
-          <!-- Side Orange Circular Arc Panels -->
-          <path d="M 8 26 A 38 38 0 0 1 20 8 L 25 15 A 30 30 0 0 0 15 29 Z" fill="url(#orangeGrad)"/>
-          <path d="M 60 8 A 38 38 0 0 1 72 26 L 65 29 A 30 30 0 0 0 55 15 Z" fill="url(#orangeGrad)"/>
-          <path d="M 12 56 A 38 38 0 0 0 30 74 L 32 66 A 30 30 0 0 1 18 52 Z" fill="url(#orangeGrad)"/>
-          <path d="M 68 56 A 38 38 0 0 1 50 74 L 48 66 A 30 30 0 0 0 62 52 Z" fill="url(#orangeGrad)"/>
-
-          <!-- Mechanical Seam Lines -->
-          <line x1="2" y1="40" x2="78" y2="40" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="3,2"/>
-          <line x1="40" y1="2" x2="40" y2="78" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="3,2"/>
-
-          <!-- Blue Status Indicator LED -->
-          <circle cx="32" cy="56" r="2.2" fill="#00f0ff" id="bb8-body-led" class="bb8-led-glow"/>
-        </svg>
-      </div>
-
-      <!-- Shadow on floor -->
-      <div class="bb8-shadow"></div>
+    <!-- 3D Three.js Mascot Canvas (150×180 px transparent container) -->
+    <div id="helix7-droid-container" class="helix7-droid-container" title="Click HELIX-7 to chat & celebrate · Double-click to follow cursor!">
+      <canvas id="helix7-canvas" width="150" height="180"></canvas>
     </div>
   </aside>
 
   <!-- Audio & Game Engine Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="js/helix7-mascot.js"></script>
   <script src="js/cloud-sync.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/cases-data.js"></script>

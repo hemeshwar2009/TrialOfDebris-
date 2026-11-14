@@ -1466,7 +1466,7 @@ body.high-contrast .crt-overlay {
 }
 
 /* ========================================================
-   CORNER PLAYTHING BOT: BB-8 ASTROMECH COMPANION STYLES
+   CORNER PLAYTHING BOT: ARGUS COMPANION PROBE STYLES
    ======================================================== */
 .bb8-companion-widget {
   position: fixed;
@@ -1540,7 +1540,7 @@ body.high-contrast .crt-overlay {
   left: 8px;
   width: 60px;
   height: 10px;
-  background: rgba(0, 0, 0, 0.65);
+  background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.45) 0%, rgba(30, 58, 138, 0.25) 45%, rgba(0, 0, 0, 0.7) 75%, transparent 100%);
   border-radius: 50%;
   filter: blur(4px);
   z-index: 1;
@@ -1581,9 +1581,264 @@ body.high-contrast .crt-overlay {
   transform: rotate(32deg) !important;
 }
 
+/* Cursor Movement Tracking */
+.bb8-tracking .bb8-head-wrap {
+  animation: none !important;
+  transition: transform 0.08s cubic-bezier(0.2, 0, 0.38, 0.9) !important;
+}
+
+#bb8-eye-pupil {
+  transition: transform 0.08s ease-out;
+}
+
+/* Funny Action 1: Dizzy Spin */
+.bb8-dizzy .bb8-head-wrap {
+  animation: bb8DizzyHead 1.6s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+.bb8-dizzy .bb8-body-wrap {
+  animation: bb8DizzyBody 1.6s ease-in-out !important;
+}
+@keyframes bb8DizzyHead {
+  0% { transform: rotate(0deg); }
+  45% { transform: rotate(720deg) scale(1.1); }
+  65% { transform: rotate(700deg) scale(0.95); }
+  85% { transform: rotate(725deg) scale(1.02); }
+  100% { transform: rotate(720deg) scale(1); }
+}
+@keyframes bb8DizzyBody {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-16deg) scale(0.95); }
+  50% { transform: rotate(18deg) scale(1.05); }
+  75% { transform: rotate(-10deg) scale(0.98); }
+}
+
+/* Funny Action 2: Startled Jump */
+.bb8-startled {
+  animation: bb8StartledJump 0.85s cubic-bezier(0.18, 0.89, 0.32, 1.28) !important;
+}
+@keyframes bb8StartledJump {
+  0% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-24px) scale(1.18) rotate(-6deg); }
+  45% { transform: translateY(-10px) scale(0.92) rotate(4deg); }
+  65% { transform: translateY(-4px) scale(1.04) rotate(-2deg); }
+  85% { transform: translateY(2px) scale(0.98); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* Funny Action 3: Tickle Giggle Shake */
+.bb8-tickle {
+  animation: bb8TickleShake 1.2s ease-in-out !important;
+}
+@keyframes bb8TickleShake {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  10%, 30%, 50%, 70%, 90% { transform: translateY(-5px) rotate(-8deg) scale(1.06); }
+  20%, 40%, 60%, 80% { transform: translateY(-2px) rotate(8deg) scale(1.04); }
+}
+
+/* Funny Action 4: Curious Peek & Scan */
+.bb8-peek .bb8-head-wrap {
+  transform: translateY(-5px) rotate(-14deg) scale(1.12) !important;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.bb8-peek #bb8-eye-pupil {
+  transform: scale(1.5) !important;
+  filter: drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 16px #38bdf8) !important;
+}
+
+/* ========================================================
+   REVOLVING GLOWING ORBIT STARS SYSTEM
+   ======================================================== */
+.bb8-orbit-system {
+  position: absolute;
+  top: 48px;
+  left: 38px;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.bb8-revolving-star {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+  transform-origin: center center;
+}
+
+.bb8-star-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 8px #60a5fa) drop-shadow(0 0 12px #2563eb);
+  animation: starTwinkle 2.2s ease-in-out infinite alternate;
+}
+
+.bb8-star-flare {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  margin-top: -11px;
+  margin-left: -11px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.7) 0%, rgba(37, 99, 235, 0.3) 45%, transparent 70%);
+  pointer-events: none;
+  animation: flarePulse 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes starTwinkle {
+  0% { transform: scale(0.85) rotate(0deg); opacity: 0.8; }
+  100% { transform: scale(1.2) rotate(15deg); opacity: 1; }
+}
+
+@keyframes flarePulse {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  100% { transform: scale(1.3); opacity: 0.95; }
+}
+
+/* Track 1 Orbit Animation */
+.track-1 {
+  animation: orbitTrack1 5.6s linear infinite;
+}
+
+.track-1.star-1 {
+  animation-delay: 0s;
+}
+
+.track-1.star-2 {
+  animation-delay: -1.866s;
+}
+
+.track-1.star-3 {
+  animation-delay: -3.733s;
+}
+
+@keyframes orbitTrack1 {
+  0% {
+    transform: translate(54px, -13px) scale(0.95);
+    z-index: 6;
+    opacity: 0.9;
+  }
+  12.5% {
+    transform: translate(49px, -2px) scale(1.08);
+    z-index: 6;
+    opacity: 1;
+  }
+  25% {
+    transform: translate(36px, 10px) scale(1.18);
+    z-index: 6;
+    opacity: 1;
+  }
+  37.5% {
+    transform: translate(12px, 20px) scale(1.25);
+    z-index: 6;
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-20px, 22px) scale(1.18);
+    z-index: 6;
+    opacity: 1;
+  }
+  62.5% {
+    transform: translate(-45px, 12px) scale(0.98);
+    z-index: 6;
+    opacity: 0.9;
+  }
+  75% {
+    transform: translate(-53px, -2px) scale(0.78);
+    z-index: 1;
+    opacity: 0.65;
+  }
+  87.5% {
+    transform: translate(-30px, -16px) scale(0.7);
+    z-index: 1;
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate(54px, -13px) scale(0.95);
+    z-index: 6;
+    opacity: 0.9;
+  }
+}
+
+/* Track 2 Cross-Inclined Orbit Animation */
+.track-2 {
+  animation: orbitTrack2 7.2s linear infinite;
+}
+
+.track-2.star-4 {
+  animation-delay: 0s;
+}
+
+.track-2.star-5 {
+  animation-delay: -3.6s;
+}
+
+@keyframes orbitTrack2 {
+  0% {
+    transform: translate(-48px, -14px) scale(0.7);
+    z-index: 1;
+    opacity: 0.55;
+  }
+  12.5% {
+    transform: translate(-20px, -22px) scale(0.68);
+    z-index: 1;
+    opacity: 0.5;
+  }
+  25% {
+    transform: translate(18px, -18px) scale(0.8);
+    z-index: 1;
+    opacity: 0.65;
+  }
+  37.5% {
+    transform: translate(46px, -6px) scale(0.98);
+    z-index: 6;
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(48px, 10px) scale(1.18);
+    z-index: 6;
+    opacity: 1;
+  }
+  62.5% {
+    transform: translate(25px, 22px) scale(1.24);
+    z-index: 6;
+    opacity: 1;
+  }
+  75% {
+    transform: translate(-10px, 20px) scale(1.16);
+    z-index: 6;
+    opacity: 1;
+  }
+  87.5% {
+    transform: translate(-42px, 8px) scale(0.95);
+    z-index: 6;
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-48px, -14px) scale(0.7);
+    z-index: 1;
+    opacity: 0.55;
+  }
+}
+
+/* Enhanced star brightness on Happy Spin */
+.bb8-happy-spin .bb8-star-svg {
+  filter: drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 16px #38bdf8) drop-shadow(0 0 24px #60a5fa);
+  transform: scale(1.35) rotate(45deg);
+}
+
+.bb8-happy-spin .bb8-star-flare {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(56, 189, 248, 0.6) 40%, transparent 75%);
+  transform: scale(1.6);
+}
+
 /* Lens & LED glows */
 .bb8-pupil-glow {
-  filter: drop-shadow(0 0 3px #ef4444);
+  filter: drop-shadow(0 0 4px #38bdf8) drop-shadow(0 0 8px #2563eb);
   animation: eyeBlink 4s infinite;
 }
 
@@ -1593,16 +1848,16 @@ body.high-contrast .crt-overlay {
 }
 
 .bb8-lens-glow {
-  filter: drop-shadow(0 0 4px #00f0ff);
+  filter: drop-shadow(0 0 4px #60a5fa);
   transition: all 0.2s;
 }
 
 .bb8-beam-active #bb8-projector-lens {
-  filter: drop-shadow(0 0 10px #00f0ff) drop-shadow(0 0 18px #ffffff);
+  filter: drop-shadow(0 0 10px #38bdf8) drop-shadow(0 0 18px #ffffff);
 }
 
 .bb8-led-glow {
-  filter: drop-shadow(0 0 3px #00f0ff);
+  filter: drop-shadow(0 0 4px #38bdf8);
   animation: ledPulse 2s ease-in-out infinite;
 }
 
@@ -1626,13 +1881,13 @@ body.high-contrast .crt-overlay {
   transform-origin: bottom right;
   background: radial-gradient(
     ellipse at 100% 100%, 
-    rgba(0, 240, 255, 0.48) 0%, 
-    rgba(0, 240, 255, 0.22) 35%, 
-    rgba(168, 85, 247, 0.12) 65%, 
+    rgba(59, 130, 246, 0.5) 0%, 
+    rgba(96, 165, 250, 0.25) 35%, 
+    rgba(255, 255, 255, 0.12) 65%, 
     transparent 80%
   );
   clip-path: polygon(100% 88%, 0% 0%, 0% 100%, 100% 100%);
-  filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.3));
+  filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.35));
 }
 
 .bb8-beam-active .bb8-beam-cone {
@@ -1804,4 +2059,534 @@ body.high-contrast .crt-overlay {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* ========================================================
+   SCREEN SWITCHING & HERO LANDING / LOGIN PAGES
+   ======================================================== */
+.screen-view.hidden {
+  display: none !important;
+}
+
+.retro-header-frame.hidden,
+.nav-tabs-bar.hidden {
+  display: none !important;
+}
+
+.landing-screen {
+  min-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.landing-content-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  max-width: 900px;
+  width: 100%;
+}
+
+/* Animated "TrailOfDebris" Hero Logo */
+.debris-hero-logo-card {
+  position: relative;
+  display: inline-block;
+  padding: 34px 44px;
+  background: radial-gradient(circle at 50% 50%, rgba(17, 9, 48, 0.75) 0%, rgba(7, 3, 20, 0.45) 70%, transparent 100%);
+  border: 1px solid rgba(88, 44, 209, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 0 45px rgba(88, 44, 209, 0.3);
+}
+
+.debris-hero-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(1.8rem, 4.6vw, 3.4rem);
+  font-weight: 900;
+  letter-spacing: 2.5px;
+  margin: 0;
+  line-height: 1.25;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.word-trail {
+  color: #ffffff;
+  text-shadow: 0 0 10px #ffffff, 0 0 20px #00f0ff, 0 0 40px #38bdf8;
+}
+
+.word-of {
+  color: #a855f7;
+  font-size: 0.8em;
+  text-shadow: 0 0 12px #c084fc, 0 0 25px #8b5cf6;
+}
+
+.word-debris {
+  color: #00f0ff;
+  text-shadow: 0 0 10px #00f0ff, 0 0 25px #22d3ee, 0 0 45px #0284c7;
+}
+
+.debris-hero-sub {
+  font-family: var(--font-silk);
+  font-size: clamp(0.72rem, 1.5vw, 0.95rem);
+  color: #c4b5fd;
+  letter-spacing: 2px;
+  margin-top: 14px;
+}
+
+.debris-badge-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.debris-mini-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 8px;
+  background: rgba(30, 27, 75, 0.65);
+  border: 1px solid #582cd1;
+  color: #67e8f9;
+  letter-spacing: 1px;
+}
+
+/* Orbit corner system (top-right corner with tail and tumbling broken hardware) */
+.orbit-corner-system {
+  position: absolute;
+  top: -45px;
+  right: -55px;
+  width: 250px;
+  height: 150px;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.orbit-tail-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.65));
+}
+
+.orbit-track-ellipse {
+  stroke-dasharray: 180 30;
+  animation: cometTailSpin 8s linear infinite;
+  transform-origin: 230px 50px;
+}
+
+@keyframes cometTailSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.orbiting-hardware-group {
+  position: absolute;
+  top: 50px;
+  left: 230px;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.debris-piece {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  margin-top: -13px;
+  margin-left: -13px;
+  filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.85));
+}
+
+.debris-piece svg {
+  width: 100%;
+  height: 100%;
+  animation: pieceTumble 5s linear infinite;
+}
+
+.shard-solar {
+  animation: orbitCorner1 7.2s linear infinite;
+}
+
+.shard-antenna {
+  animation: orbitCorner1 7.2s linear infinite -1.8s;
+}
+
+.shard-chip {
+  animation: orbitCorner1 7.2s linear infinite -3.6s;
+}
+
+.shard-bolt {
+  animation: orbitCorner1 7.2s linear infinite -5.4s;
+}
+
+@keyframes pieceTumble {
+  0% { transform: rotate(0deg) scale(0.9); }
+  50% { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(0.9); }
+}
+
+@keyframes orbitCorner1 {
+  0% {
+    transform: translate(68px, -18px) scale(0.95);
+    z-index: 5;
+    opacity: 0.95;
+  }
+  25% {
+    transform: translate(15px, 32px) scale(1.2);
+    z-index: 6;
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-68px, 15px) scale(0.9);
+    z-index: 2;
+    opacity: 0.75;
+  }
+  75% {
+    transform: translate(-15px, -32px) scale(0.7);
+    z-index: 1;
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(68px, -18px) scale(0.95);
+    z-index: 5;
+    opacity: 0.95;
+  }
+}
+
+.landing-login-action {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.main-enter-btn {
+  font-size: 13px !important;
+  padding: 13px 28px !important;
+  letter-spacing: 2px !important;
+  background: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 100%) !important;
+  color: #0b0520 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.65), 0 0 45px rgba(139, 92, 246, 0.45) !important;
+  border: 1px solid #ffffff !important;
+  cursor: pointer;
+}
+
+.main-enter-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 0 35px rgba(0, 240, 255, 0.9), 0 0 60px rgba(139, 92, 246, 0.7) !important;
+}
+
+.sm-login-btn {
+  font-size: 11px;
+  padding: 12px 20px;
+  letter-spacing: 1.5px;
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: #8b5cf6 !important;
+  color: #c4b5fd !important;
+}
+
+.sm-login-btn:hover {
+  background: #5b21b6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.6) !important;
+}
+
+.landing-enter-hint {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: #94a3b8;
+  letter-spacing: 1.2px;
+  margin-top: 14px;
+  opacity: 0.85;
+}
+
+.debris-hero-logo-card {
+  cursor: pointer;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.debris-hero-logo-card:hover {
+  transform: scale(1.015);
+  box-shadow: 0 0 40px rgba(0, 240, 255, 0.4), 0 0 70px rgba(88, 44, 209, 0.45);
+}
+
+.login-alt-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.direct-enter-btn {
+  background: #0f172a !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.25) !important;
+}
+
+.direct-enter-btn:hover {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.6) !important;
+}
+
+/* ========================================================
+   PAGE 2: LOGIN AUTHENTICATION CARD & VIEW
+   ======================================================== */
+.login-screen {
+  min-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 20px;
+}
+
+.login-page-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.compact-logo {
+  padding: 16px 24px !important;
+  transform: scale(0.85);
+}
+
+.compact-title {
+  font-size: 1.8rem !important;
+}
+
+.compact-orbit {
+  transform: scale(0.85);
+  top: -35px !important;
+  right: -35px !important;
+}
+
+.debris-piece.sm {
+  width: 18px;
+  height: 18px;
+}
+
+.retro-login-card {
+  width: 100%;
+  background: rgba(11, 5, 32, 0.94);
+  backdrop-filter: blur(12px);
+  border: 2px solid var(--border-cyan);
+  border-radius: 8px;
+  box-shadow: 
+    0 0 35px rgba(0, 240, 255, 0.3),
+    0 0 60px rgba(88, 44, 209, 0.35),
+    inset 0 0 25px rgba(0, 240, 255, 0.1);
+  padding: 26px 24px;
+}
+
+.login-card-badge {
+  font-family: var(--font-pixel);
+  font-size: 7.5px;
+  color: var(--cyan-neon);
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+}
+
+.login-card-title {
+  font-family: var(--font-silk);
+  font-size: 13.5px;
+  color: #ffffff;
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border-secondary);
+  padding-bottom: 10px;
+}
+
+.form-field-group {
+  margin-bottom: 16px;
+}
+
+.retro-label {
+  display: block;
+  font-family: var(--font-silk);
+  font-size: 9px;
+  color: #c4b5fd;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--cyan-neon);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.retro-input-field {
+  width: 100%;
+  background: #070314;
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  padding: 11px 12px 11px 36px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.retro-input-field:focus {
+  border-color: var(--cyan-neon);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+}
+
+.full-btn {
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px;
+  font-size: 10.5px;
+  justify-content: center;
+}
+
+.guest-btn {
+  background: #110930 !important;
+  border-color: #22c55e !important;
+  color: #86efac !important;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.3) !important;
+}
+
+.guest-btn:hover {
+  background: #166534 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 25px rgba(34, 197, 94, 0.6) !important;
+}
+
+.login-card-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border-secondary);
+}
+
+.divider-text {
+  font-family: var(--font-silk);
+  font-size: 8.5px;
+  color: #94a3b8;
+  letter-spacing: 1px;
+}
+
+.login-card-footer {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.back-link-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-family: var(--font-silk);
+  font-size: 9px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: color 0.15s;
+}
+
+.back-link-btn:hover {
+  color: var(--cyan-neon);
+}
+
+/* ========================================================
+   HELIX-7: 3D DROID MASCOT FIXED CORNER WIDGET
+   ======================================================== */
+.helix7-widget {
+  position: fixed;
+  bottom: 18px;
+  right: 22px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.helix7-droid-container {
+  pointer-events: auto;
+  position: relative;
+  width: 150px;
+  height: 180px;
+  cursor: pointer;
+  user-select: none;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.85));
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.helix7-droid-container:hover {
+  transform: translateY(-4px) scale(1.05);
+}
+
+.helix7-droid-container:active {
+  transform: translateY(2px) scale(0.96);
+}
+
+#helix7-canvas {
+  width: 150px !important;
+  height: 180px !important;
+  display: block;
+}
+
+/* Cursor Follow Companion Mode */
+.helix7-widget.following-cursor {
+  transition: none !important;
+  will-change: left, top;
+  filter: drop-shadow(0 14px 35px rgba(0, 240, 255, 0.45));
+}
+
+.helix7-widget.following-cursor .helix7-droid-container {
+  animation: companionPulse 2.2s infinite ease-in-out;
+}
+
+@keyframes companionPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.65)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.85));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(244, 114, 182, 0.85)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.85));
+  }
 }
