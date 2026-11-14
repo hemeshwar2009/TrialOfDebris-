@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AFTERLIGHT - NASA Space Legacy Forensic Archive</title>
+  <link rel="stylesheet" href="css/retro-theme.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛰️</text></svg>">
+</head>
+<body>
+  <!-- Starfield Canvas -->
+  <canvas id="starfield-canvas"></canvas>
+
+  <!-- CRT Scanline & Phosphor Overlay -->
+  <div id="crt-overlay" class="crt-overlay"></div>
+
+  <div class="app-container">
+    <!-- ========================================================
+         TOP RETRO HEADER FRAME (AFTERLIGHT SPECIFICATION)
+         ======================================================== -->
+    <header class="retro-header-frame">
+      <!-- Row 1: Brand & Subtitle -->
+      <div class="header-brand-row">
+        <div class="probe-icon-box">
+          <span>🛰️</span>
+        </div>
+        <div class="title-wrap">
+          <h1 class="site-title">AFTERLIGHT</h1>
+          <p class="site-sub">ABANDONED BUT NOT FORGOTTEN · SPACE APPS 2026</p>
+        </div>
+      </div>
+
+      <!-- Row 2: Status Pills / Badges -->
+      <div class="header-status-row">
+        <span class="pixel-pill pill-offline">▲ OFFLINE</span>
+        <span class="pixel-pill pill-cadet" id="player-lvl-pill">★ LVL: CADET</span>
+        <span class="pixel-pill pill-investigator" id="player-rank-pill">👤 SENIOR MISSION INVESTIGATOR | <span id="solved-count-badge">0/24 SOLVED</span></span>
+        <button id="toggle-audio-btn" class="pixel-pill pill-action-btn">🔊 SOUND: ON</button>
+        <button id="toggle-crt-btn" class="pixel-pill pill-action-btn">📺 CRT: ON</button>
+        <button id="toggle-contrast-btn" class="pixel-pill pill-action-btn">◉ CONTRAST: NORM</button>
+        <button id="btn-signin" class="pixel-pill pill-purple" onclick="window.gameApp.toggleTreeView()">🔑 MISSION TREE</button>
+      </div>
+    </header>
+
+    <!-- ========================================================
+         RETRO BLOCK NAVIGATION TABS (MATCHING SCREENSHOT)
+         ======================================================== -->
+    <nav class="nav-tabs-bar" id="main-nav-tabs">
+      <button class="nav-tab-btn active" id="tab-briefing" onclick="window.gameApp.goToScreen('destination')">
+        MISSION BRIEFING
+      </button>
+      <button class="nav-tab-btn" id="tab-caseboard" onclick="window.gameApp.goToScreen('levels')">
+        CASE BOARD (24)
+      </button>
+      <button class="nav-tab-btn" id="tab-missiontree" onclick="window.gameApp.goToScreen('tree')">
+        MISSION TREE MATRIX
+      </button>
+      <button class="nav-tab-btn" id="tab-depth" onclick="window.gameApp.goToScreen('depth')">
+        CLEARANCE DEPTH
+      </button>
+    </nav>
+
+    <!-- ========================================================
+         PAGE 1: MISSION BRIEFING & SHOWCASE (MATCHING SCREENSHOT)
+         ======================================================== -->
+    <main id="screen-destination" class="screen-view">
+      <div class="showcase-frame">
+        <div style="text-align: center;">
+          <div class="challenge-tag-pill">
+            NASA SPACE APPS CHALLENGE 2026 • ABANDONED BUT NOT FORGOTTEN
+          </div>
+        </div>
+
+        <h2 class="hero-headline">
+          REOPEN THE CASE FILES OF HUMANITY'S GREATEST EXPLORERS
+        </h2>
+
+        <p class="mystery-callout">
+          Every silent spacecraft left a mystery. Why did it fly? What did it discover? And why did it fall quiet?
+        </p>
+
+        <p class="hero-prose">
+          You are a mission investigator. Earn the story not by reading passive facts, but by analyzing real telemetry charts, evaluating declassified engineering logs, and committing to a hypothesis.
+        </p>
+
+        <!-- 3 Principles Row from Screenshot -->
+        <div class="principles-row">
+          <div class="principle-box">
+            <span class="principle-title">1. REAL FACTS, GAME WRAPPER</span>
+            <p class="principle-desc">
+              Every case is built on documented NASA history. We never invent causes. The game adds an investigator wrapper, never fictional accidents.
+            </p>
+          </div>
+
+          <div class="principle-box">
+            <span class="principle-title">2. ONE CASE, THREE DEPTHS</span>
+            <p class="principle-desc">
+              The same spacecraft plays differently for school students, college analysts, and lead researchers, reading from verified flight records.
+            </p>
+          </div>
+
+          <div class="principle-box">
+            <span class="principle-title">3. CONFIRMED VS. SUSPECTED</span>
+            <p class="principle-desc">
+              Learn the vital scientific difference between what mission investigators proved from telemetry and what remains an educated hypothesis.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Destination Choice Cards: Mars vs Moons -->
+      <div style="text-align: center; margin-bottom: 12px;">
+        <span class="challenge-tag-pill" style="border-color: var(--border-glow); color: var(--text-lavender);">
+          [ CHOOSE CELESTIAL STAGE // 12 UNIQUE MISSIONS EACH ]
+        </span>
+      </div>
+
+      <div class="destinations-grid">
+        <!-- MARS SELECTION -->
+        <div class="planet-card mars-card" onclick="window.gameApp.selectDestination('mars')">
+          <div class="planet-orb mars-orb"></div>
+          <h3 class="planet-name">MARS OPERATIONS</h3>
+          <p class="planet-subtitle">12 UNIQUE DECLASSIFIED MISSIONS</p>
+          <ul class="planet-features-list">
+            <li><span>MISSION COUNT:</span> <span style="color: var(--amber-pixel);">12 UNIQUE SPACECRAFT</span></li>
+            <li><span>BRANCHES:</span> <span>[STARTER: 4] || [MIDDLE: 4] || [ADVANCED: 4]</span></li>
+            <li><span>NOTABLE CRAFT:</span> <span>OPPORTUNITY, MCO, POLAR LANDER, SPIRIT, MGS</span></li>
+          </ul>
+          <button class="retro-btn pulse-btn">OPEN MARS DOSSIER (12 MISSIONS) ▶</button>
+        </div>
+
+        <!-- MOON SELECTION -->
+        <div class="planet-card moon-card" onclick="window.gameApp.selectDestination('moon')">
+          <div class="planet-orb moon-orb"></div>
+          <h3 class="planet-name">MOONS OPERATIONS</h3>
+          <p class="planet-subtitle">12 UNIQUE DECLASSIFIED MISSIONS</p>
+          <ul class="planet-features-list">
+            <li><span>MISSION COUNT:</span> <span style="color: var(--cyan-neon);">12 UNIQUE SPACECRAFT</span></li>
+            <li><span>BRANCHES:</span> <span>[STARTER: 4] || [MIDDLE: 4] || [ADVANCED: 4]</span></li>
+            <li><span>NOTABLE CRAFT:</span> <span>APOLLO 13, LCROSS, SURVEYOR 2 & 4, APOLLO 11</span></li>
+          </ul>
+          <button class="retro-btn pulse-btn">OPEN MOONS DOSSIER (12 MISSIONS) ▶</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ========================================================
+         MISSION TREE MATRIX (USER'S EXACT DIAGRAM ARCHITECTURE)
+         ======================================================== -->
+    <main id="screen-tree" class="screen-view hidden">
+      <div class="showcase-frame">
+        <div style="text-align: center;">
+          <div class="challenge-tag-pill">
+            MISSION ARCHITECTURE // 24 UNIQUE CASE FILES (12 EACH)
+          </div>
+        </div>
+
+        <h2 class="hero-headline" style="font-size: 16px;">
+          FORENSIC MISSION MATRIX
+        </h2>
+
+        <p class="hero-prose" style="margin-bottom: 14px;">
+          Direct access across all 24 unique missions. Click any mission node to launch forensic investigation immediately.
+        </p>
+
+        <div class="tree-matrix-section" id="tree-matrix-container">
+          <!-- Rendered dynamically by app.js: MARS & MOONS -> [starter][middle][advanced] -> [4 levels] -->
+        </div>
+      </div>
+    </main>
+
+    <!-- ========================================================
+         PAGE 2: DEPTH / CLEARANCE SELECTION (STARTER, MIDDLE, ADVANCED)
+         ======================================================== -->
+    <main id="screen-depth" class="screen-view hidden">
+      <div class="showcase-frame">
+        <div style="text-align: center;">
+          <div class="challenge-tag-pill" id="depth-target-badge">
+            INVESTIGATOR CLEARANCE // SELECT RESEARCH DEPTH
+          </div>
+        </div>
+
+        <h2 class="hero-headline" style="font-size: 16px;">
+          SELECT INVESTIGATION DEPTH
+        </h2>
+
+        <p class="mystery-callout" id="depth-dest-label" style="font-size: 19px;">
+          MARS (12 MISSIONS)
+        </p>
+
+        <p class="hero-prose" style="margin-bottom: 20px;">
+          The depth tier alters the forensic presentation layer, evidence complexity, and puzzle depth without altering verified historical facts.
+        </p>
+
+        <div class="depth-grid">
+          <!-- STARTER -->
+          <div class="depth-card" onclick="window.gameApp.selectDepth('starter')">
+            <div class="depth-rank-badge">★ CADET RANK</div>
+            <h3 class="depth-title">[ STARTER ]</h3>
+            <p class="depth-target">School Tier // 4 Missions</p>
+            <p class="depth-desc">Friendly guiding voice, clear visual hardware diagrams, 3 plain-language clues per case, intuitive drag-and-tap mini-games.</p>
+            <div class="depth-specs">
+              <p><span>NARRATOR:</span> <strong>Friendly & Clear</strong></p>
+              <p><span>CLUES:</span> <strong>3 Simple Clues</strong></p>
+              <p><span>PUZZLES:</span> <strong>Intuitive Tap Action</strong></p>
+            </div>
+            <button class="retro-btn">PROCEED TO MISSIONS ▶</button>
+          </div>
+
+          <!-- MIDDLE -->
+          <div class="depth-card" onclick="window.gameApp.selectDepth('middle')">
+            <div class="depth-rank-badge">★★ ANALYST RANK</div>
+            <h3 class="depth-title">[ MIDDLE ]</h3>
+            <p class="depth-target">College Tier // 4 Missions</p>
+            <p class="depth-desc">Technical aerospace terminology explained once, subsystem charts, 5 to 6 hardware clues, multi-factor hypothesis formulation.</p>
+            <div class="depth-specs">
+              <p><span>NARRATOR:</span> <strong>Technical & Precise</strong></p>
+              <p><span>CLUES:</span> <strong>5 Subsystem Cards</strong></p>
+              <p><span>PUZZLES:</span> <strong>Calculations & Calibrations</strong></p>
+            </div>
+            <button class="retro-btn pulse-btn">PROCEED TO MISSIONS ▶</button>
+          </div>
+
+          <!-- ADVANCED -->
+          <div class="depth-card" onclick="window.gameApp.selectDepth('advanced')">
+            <div class="depth-rank-badge">★★★ LEAD INVESTIGATOR</div>
+            <h3 class="depth-title">[ ADVANCED ]</h3>
+            <p class="depth-target">Researcher Tier // 4 Missions</p>
+            <p class="depth-desc">Raw telemetry hex logs, original NASA failure review board excerpts, 8+ clues, anomaly signal analysis, and open research questions.</p>
+            <div class="depth-specs">
+              <p><span>NARRATOR:</span> <strong>Domain Terse</strong></p>
+              <p><span>CLUES:</span> <strong>8+ Forensic Telemetry Logs</strong></p>
+              <p><span>PUZZLES:</span> <strong>Signal Anomaly Filtering</strong></p>
+            </div>
+            <button class="retro-btn">PROCEED TO MISSIONS ▶</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ========================================================
+         PAGE 3: CASE BOARD / SEQUENTIAL LEVEL DOSSIER
+         ======================================================== -->
+    <main id="screen-levels" class="screen-view hidden">
+      <div class="showcase-frame">
+        <div style="text-align: center;">
+          <div class="challenge-tag-pill" id="level-destination-tag">
+            CASE BOARD // CHRONOLOGICAL DOSSIER
+          </div>
+        </div>
+
+        <h2 class="hero-headline" id="levels-view-title" style="font-size: 16px;">
+          MISSIONS IN CHRONOLOGICAL ORDER
+        </h2>
+
+        <p class="hero-prose" style="margin-bottom: 18px;">
+          Examine the incident dossiers in order. Clear each mission to unlock subsequent declassified investigations.
+        </p>
+
+        <div class="levels-timeline" id="levels-timeline-container">
+          <!-- Injected dynamically via JS based on selected destination and depth -->
+        </div>
+      </div>
+    </main>
+
+    <!-- ========================================================
+         PAGE 4 & 5: DETECTIVE GAME PAGE (ACTION, HARDWARE FORENSICS & STORY)
+         ======================================================== -->
+    <main id="screen-game" class="screen-view hidden">
+      <div class="game-layout">
+        <!-- Incident Case Briefing Header -->
+        <div class="incident-brief-card">
+          <div class="brief-meta">
+            <span>CASE: <strong id="game-case-id">MER-B</strong></span>
+            <span>TARGET: <strong id="game-target">MARS // ENDEAVOUR CRATER</strong></span>
+            <span>TIMELINE: <strong id="game-date">2003 - 2018</strong></span>
+            <span class="tag-suspected" id="game-ending-type">LOST IN STORM</span>
+          </div>
+
+          <div class="brief-mystery-banner">
+            <p class="brief-mystery-text" id="game-mystery-text">
+              "Why did a rover built for 90 days keep working for 14 years, then suddenly go silent?"
+            </p>
+          </div>
+
+          <!-- Forensic Workbench Mode Switcher -->
+          <div class="workbench-tabs">
+            <button class="workbench-tab-btn active" id="tab-btn-blueprint" onclick="window.gameApp.switchGameTab('blueprint')">
+              🛠 1. HARDWARE BLUEPRINT & CRASH INSPECTOR
+            </button>
+            <button class="workbench-tab-btn" id="tab-btn-action" onclick="window.gameApp.switchGameTab('action')">
+              🎮 2. RETRO ACTION MINI-GAME
+            </button>
+            <button class="workbench-tab-btn" id="tab-btn-clues" onclick="window.gameApp.switchGameTab('clues')">
+              🔍 3. EVIDENCE DESK (<span id="clues-count-tag">3</span> CLUES)
+            </button>
+            <button class="workbench-tab-btn" id="tab-btn-hypothesis" onclick="window.gameApp.switchGameTab('hypothesis')">
+              ⚖ 4. FORENSIC HYPOTHESIS & DEDUCTION
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB 1: HARDWARE BLUEPRINT INSPECTOR -->
+        <div id="game-tab-blueprint" class="game-tab-panel">
+          <div class="hardware-stage-grid">
+            <div class="canvas-blueprint-wrapper">
+              <canvas id="blueprint-canvas" width="600" height="350"></canvas>
+              <div class="blueprint-instruction">
+                ⚡ CLICK / TAP ANY HARDWARE SUBSYSTEM MARKER TO INSPECT DAMAGE & READ SILENT LOGS
+              </div>
+            </div>
+
+            <!-- Active Component Forensic Readout -->
+            <div class="component-inspect-panel" id="component-inspect-panel">
+              <div>
+                <h4 class="inspector-title" id="comp-name">SOLAR PANEL ARRAY</h4>
+                <div class="inspector-badge-row">
+                  <span id="comp-status" class="tag-confirmed">CRITICAL FAILURE (BLOCKED)</span>
+                </div>
+                <p class="component-desc" id="comp-desc">
+                  Photovoltaic cells capable of generating ~900 Watt-hours. Atmospheric Tau exceeded 10.8, dropping energy to 22 Watt-hours.
+                </p>
+                <div class="silent-story-box">
+                  <span class="silent-story-label">SILENT HISTORICAL RECORD // DECLASSIFIED:</span>
+                  <p class="silent-story-text" id="comp-story">
+                    The Martian sky darkened into pitch black. Without sun, the vital survival heaters could not stop the electronics from freezing.
+                  </p>
+                </div>
+              </div>
+
+              <button class="retro-btn pulse-btn sm-btn" onclick="window.gameApp.switchGameTab('action')">
+                PROCEED TO ACTION MINI-GAME ▶
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: RETRO ACTION MINI-GAME -->
+        <div id="game-tab-action" class="game-tab-panel hidden">
+          <div id="minigame-container">
+            <!-- Injected by MiniGameManager -->
+          </div>
+        </div>
+
+        <!-- TAB 3: EVIDENCE DESK -->
+        <div id="game-tab-clues" class="game-tab-panel hidden">
+          <div class="clues-grid" id="clues-grid">
+            <!-- Dynamic Clue Cards -->
+          </div>
+        </div>
+
+        <!-- TAB 4: FORENSIC HYPOTHESIS & DEDUCTION -->
+        <div id="game-tab-hypothesis" class="game-tab-panel hidden">
+          <div class="hypothesis-section">
+            <h3 class="hypo-title">SUBMIT FORENSIC VERDICT</h3>
+            <p class="hypo-sub">Based on the damaged hardware blueprints, action telemetry, and evidence cards, what is the definitive cause of this mission outcome?</p>
+
+            <div class="hypotheses-list" id="hypotheses-list">
+              <!-- Radio choices injected dynamically -->
+            </div>
+
+            <div style="margin-top: 24px; text-align: center;">
+              <button id="submit-hypothesis-btn" class="retro-btn pulse-btn" onclick="window.gameApp.submitHypothesis()">
+                SUBMIT INVESTIGATION VERDICT ▶
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEBRIEF & HISTORICAL MEMORIAL MODAL -->
+        <div id="game-debrief-view" class="debrief-card hidden">
+          <div class="verdict-header">
+            <span class="verdict-badge" id="debrief-verdict-tag">✓ VERDICT VERIFIED BY FLIGHT HISTORIAN</span>
+            <h3 class="verdict-title" id="debrief-case-title">CASE 01 SOLVED: OPPORTUNITY ROVER</h3>
+            <p id="debrief-score-text" style="color: var(--cyan-neon); font-family: var(--font-term); font-size: 18px;">ACCURACY: 100% // BADGE UNLOCKED</p>
+          </div>
+
+          <div class="historical-grid">
+            <div class="debrief-box">
+              <span class="debrief-label">WHAT INVESTIGATORS PROVED (CONFIRMED):</span>
+              <p class="debrief-text" id="debrief-proven">Dust storm starved solar panels, cutting battery and heater power.</p>
+            </div>
+
+            <div class="debrief-box">
+              <span class="debrief-label">WHAT REMAINS SUSPECTED (UNCERTAIN):</span>
+              <p class="debrief-text" id="debrief-suspected">Whether battery froze first or the master clock desynchronized.</p>
+            </div>
+
+            <div class="debrief-box">
+              <span class="debrief-label">HOW NASA REDESIGNED FUTURE SPACECRAFT:</span>
+              <p class="debrief-text" id="debrief-legacy">Shifted to Radioisotope Thermoelectric Generators (RTGs) for Curiosity and Perseverance.</p>
+            </div>
+
+            <div class="debrief-box">
+              <span class="debrief-label">OPEN QUESTION FOR FUTURE EXPLORERS:</span>
+              <p class="debrief-text" id="debrief-open">Can electro-static dust coatings protect future human Martian habitats?</p>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 20px;">
+            <button class="retro-btn" onclick="window.gameApp.goToScreen('levels')">
+              ◀ RETURN TO CASE BOARD
+            </button>
+            <button id="next-level-btn" class="retro-btn pulse-btn" onclick="window.gameApp.nextLevel()">
+              PROCEED TO NEXT MISSION ▶
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Retro Status Footer -->
+    <footer class="retro-footer">
+      AFTERLIGHT // NASA SPACE APPS CHALLENGE 2026 // ABANDONED BUT NOT FORGOTTEN
+    </footer>
+  </div>
+
+  <!-- ========================================================
+       CORNER PLAYTHING BOT: BB-8 COMPANION WITH FLASHLIGHT HOLO
+       ======================================================== -->
+  <aside id="bb8-companion-widget" class="bb8-companion-widget" aria-label="BB-8 Astromech Companion Droid">
+    <!-- Flashlight / Hologram Projector Beam Cone -->
+    <div id="bb8-beam-cone" class="bb8-beam-cone"></div>
+
+    <!-- Hologram Dialog Speech Box -->
+    <div id="bb8-holo-box" class="bb8-holo-box">
+      <div class="bb8-holo-header">
+        <span class="bb8-holo-title"><i class="bb8-status-dot"></i> BB-8 ASTROMECH // FORENSIC LOG</span>
+        <div class="bb8-holo-actions">
+          <button id="bb8-btn-chirp" class="bb8-icon-btn" title="Chirp / Tell Tip" onclick="window.bb8Bot.interact()">💬</button>
+          <button id="bb8-btn-toggle" class="bb8-icon-btn" title="Toggle Log" onclick="window.bb8Bot.toggleHolo()">×</button>
+        </div>
+      </div>
+      <div class="bb8-holo-body">
+        <span id="bb8-message-text" class="bb8-message-text"></span><span class="bb8-cursor">█</span>
+      </div>
+      <div class="bb8-holo-footer">
+        <span>CLICK BB-8 FOR HINTS & DECLASSIFIED LORE 💬</span>
+      </div>
+    </div>
+
+    <!-- Interactive Cute BB-8 Droid -->
+    <div id="bb8-droid" class="bb8-droid" onclick="window.bb8Bot.interact()" title="Click BB-8 to play & hear tips!">
+      <!-- Dome Head -->
+      <div class="bb8-head-wrap" id="bb8-head">
+        <svg class="bb8-head-svg" viewBox="0 0 70 45">
+          <!-- Antennas -->
+          <line x1="48" y1="12" x2="48" y2="0" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+          <line x1="42" y1="12" x2="42" y2="5" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="48" cy="1" r="1.5" fill="#f97316"/>
+          
+          <!-- Dome Base -->
+          <path d="M 12 36 A 23 23 0 0 1 58 36 Z" fill="#f8fafc" stroke="#334155" stroke-width="1.5"/>
+          
+          <!-- Top Silver Cap / Radar Dome -->
+          <ellipse cx="35" cy="15" rx="15" ry="4" fill="#cbd5e1" stroke="#475569" stroke-width="1"/>
+          <ellipse cx="35" cy="14" rx="7" ry="2" fill="#f97316"/>
+          
+          <!-- Orange Lateral Stripes -->
+          <path d="M 14 30 Q 35 26 56 30 L 57 34 Q 35 30 13 34 Z" fill="#ea580c"/>
+          <rect x="22" y="27" width="5" height="4" fill="#f8fafc"/>
+          <rect x="43" y="27" width="5" height="4" fill="#f8fafc"/>
+
+          <!-- Primary Photoreceptor Eye (Large Dark Lens) -->
+          <circle cx="35" cy="22" r="7.5" fill="#0f172a" stroke="#cbd5e1" stroke-width="1.5"/>
+          <circle cx="35" cy="22" r="5" fill="#020617"/>
+          <circle cx="35" cy="22" r="2.5" fill="#ef4444" id="bb8-eye-pupil" class="bb8-pupil-glow"/>
+          <circle cx="37" cy="20" r="1.2" fill="#ffffff"/>
+
+          <!-- Secondary Projector Lens (Flashlight Emitter) -->
+          <circle cx="46" cy="26" r="4" fill="#1e293b" stroke="#64748b" stroke-width="1"/>
+          <circle cx="46" cy="26" r="2.5" fill="#00f0ff" id="bb8-projector-lens" class="bb8-lens-glow"/>
+
+          <!-- Bottom Neck Ring -->
+          <ellipse cx="35" cy="37" rx="24" ry="3.5" fill="#1e293b" stroke="#0f172a" stroke-width="1"/>
+        </svg>
+      </div>
+
+      <!-- Spherical Body -->
+      <div class="bb8-body-wrap" id="bb8-body">
+        <svg class="bb8-body-svg" viewBox="0 0 80 80">
+          <!-- Main White Sphere -->
+          <defs>
+            <radialGradient id="sphereGrad" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="65%" stop-color="#f1f5f9"/>
+              <stop offset="100%" stop-color="#cbd5e1"/>
+            </radialGradient>
+            <linearGradient id="orangeGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fb923c"/>
+              <stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+
+          <circle cx="40" cy="40" r="38" fill="url(#sphereGrad)" stroke="#334155" stroke-width="1.8"/>
+
+          <!-- Central Iconic Orange Circle Panel (Tool Bay) -->
+          <circle cx="40" cy="40" r="21" fill="none" stroke="url(#orangeGrad)" stroke-width="7"/>
+          <circle cx="40" cy="40" r="14" fill="#e2e8f0" stroke="#475569" stroke-width="1"/>
+          
+          <!-- Inner Tool Bay Details -->
+          <rect x="35" y="32" width="10" height="4" fill="#334155"/>
+          <rect x="35" y="38" width="10" height="4" fill="#475569"/>
+          <rect x="35" y="44" width="10" height="4" fill="#334155"/>
+          <circle cx="40" cy="40" r="3" fill="#ea580c"/>
+
+          <!-- Side Orange Circular Arc Panels -->
+          <path d="M 8 26 A 38 38 0 0 1 20 8 L 25 15 A 30 30 0 0 0 15 29 Z" fill="url(#orangeGrad)"/>
+          <path d="M 60 8 A 38 38 0 0 1 72 26 L 65 29 A 30 30 0 0 0 55 15 Z" fill="url(#orangeGrad)"/>
+          <path d="M 12 56 A 38 38 0 0 0 30 74 L 32 66 A 30 30 0 0 1 18 52 Z" fill="url(#orangeGrad)"/>
+          <path d="M 68 56 A 38 38 0 0 1 50 74 L 48 66 A 30 30 0 0 0 62 52 Z" fill="url(#orangeGrad)"/>
+
+          <!-- Mechanical Seam Lines -->
+          <line x1="2" y1="40" x2="78" y2="40" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="3,2"/>
+          <line x1="40" y1="2" x2="40" y2="78" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="3,2"/>
+
+          <!-- Blue Status Indicator LED -->
+          <circle cx="32" cy="56" r="2.2" fill="#00f0ff" id="bb8-body-led" class="bb8-led-glow"/>
+        </svg>
+      </div>
+
+      <!-- Shadow on floor -->
+      <div class="bb8-shadow"></div>
+    </div>
+  </aside>
+
+  <!-- Audio & Game Engine Scripts -->
+  <script src="js/audio.js"></script>
+  <script src="js/cases-data.js"></script>
+  <script src="js/minigames.js"></script>
+  <script src="js/hardware-renderer.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
