@@ -33,6 +33,7 @@
       <!-- Row 2: Status Pills / Badges -->
       <div class="header-status-row">
         <span class="pixel-pill pill-offline">▲ OFFLINE</span>
+        <span class="pixel-pill pill-cadet" id="cloud-sync-status" data-state="pending" title="Mission progress is saved to Supabase">☁ CLOUD: CONNECTING</span>
         <span class="pixel-pill pill-cadet" id="player-lvl-pill">★ LVL: CADET</span>
         <span class="pixel-pill pill-investigator" id="player-rank-pill">👤 SENIOR MISSION INVESTIGATOR | <span id="solved-count-badge">0/24 SOLVED</span></span>
         <button id="toggle-audio-btn" class="pixel-pill pill-action-btn">🔊 SOUND: ON</button>
@@ -525,6 +526,8 @@
   </aside>
 
   <!-- Audio & Game Engine Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="js/cloud-sync.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/cases-data.js"></script>
   <script src="js/minigames.js"></script>

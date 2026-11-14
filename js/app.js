@@ -190,6 +190,7 @@ class SpaceLegacyApp {
     } catch (e) {
       console.warn('Storage write failed:', e);
     }
+    if (window.CloudSync) window.CloudSync.save(this.savedProgress);
     this.updateOverallProgressStats();
   }
 
@@ -234,6 +235,25 @@ class SpaceLegacyApp {
 
     // Start on Screen 1: Destination
     this.goToScreen('destination');
+
+    this.initCloudSync();
+  }
+
+  // Pull cloud-saved progress from Supabase and merge it with this browser's copy.
+  async initCloudSync() {
+    if (!window.CloudSync) return;
+    const merged = await window.CloudSync.init(this.savedProgress);
+    if (!merged) return;
+    this.savedProgress = merged;
+    try {
+      localStorage.setItem('nasa_space_legacy_progress_v2', JSON.stringify(this.savedProgress));
+    } catch (e) { /* offline storage unavailable */ }
+    this.updateOverallProgressStats();
+    this.renderTreeMatrix();
+    const levelsEl = document.getElementById('screen-levels');
+    if (levelsEl && !levelsEl.classList.contains('hidden')) {
+      this.renderLevelsTimeline();
+    }
   }
 
   initAudioAndCRTControls() {
