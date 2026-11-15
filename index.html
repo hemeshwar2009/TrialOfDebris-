@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AFTERLIGHT - NASA Space Legacy Forensic Archive</title>
   <link rel="stylesheet" href="css/retro-theme.css">
+  <link rel="stylesheet" href="css/auth.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛰️</text></svg>">
 </head>
 <body>
@@ -177,49 +178,15 @@
         </div>
 
         <!-- The Login Card -->
+        <!-- Real accounts (Supabase Auth + passkeys) are rendered here by js/auth.js -->
         <div class="retro-login-card">
           <div class="login-card-badge">
-            <span class="badge-dot"></span> SECURITY LEVEL: CADET TO INVESTIGATOR
+            <span class="badge-dot"></span> SECURE ACCESS · CONNECTING…
           </div>
-          <h3 class="login-card-title">FORENSIC ARCHIVE AUTHENTICATION</h3>
-
-          <form id="auth-login-form" class="retro-login-form" onsubmit="window.gameApp.handleAuthSubmit(event)">
-            <div class="form-field-group">
-              <label for="login-email" class="retro-label">INVESTIGATOR EMAIL ID</label>
-              <div class="input-with-icon">
-                <span class="input-icon">✉</span>
-                <input type="email" id="login-email" class="retro-input-field" placeholder="cadet@afterlight.space" value="cadet@afterlight.space" required>
-              </div>
-            </div>
-
-            <div class="form-field-group">
-              <label for="login-password" class="retro-label">SECURITY PASSPHRASE</label>
-              <div class="input-with-icon">
-                <span class="input-icon">🔒</span>
-                <input type="password" id="login-password" class="retro-input-field" placeholder="••••••••••••" value="apollo13rescue" required>
-              </div>
-            </div>
-
-            <button type="submit" class="retro-btn pulse-btn full-btn auth-submit-btn">
-              AUTHENTICATE & ENTER ARCHIVE ▶
-            </button>
-          </form>
-
-          <div class="login-card-divider">
-            <span class="divider-line"></span>
-            <span class="divider-text">OR DIRECT ENTRY</span>
-            <span class="divider-line"></span>
-          </div>
-
-          <div class="login-alt-actions">
-            <button type="button" class="retro-btn guest-btn full-btn" onclick="window.gameApp.handleGuestLogin()">
-              🚀 ENTER AS GUEST ACCOUNT
-            </button>
-            <button type="button" class="retro-btn direct-enter-btn full-btn" onclick="window.gameApp.enterMainPage()">
-              ⚡ CLICK TO ENTER MAIN PAGE DIRECTLY
-            </button>
-          </div>
-
+          <p class="auth-lead">Connecting to the archive… If this doesn't load, you can still play as a guest.</p>
+          <button type="button" class="retro-btn guest-btn full-btn" onclick="window.gameApp.handleGuestLogin()">
+            🚀 CONTINUE AS GUEST
+          </button>
           <div class="login-card-footer">
             <button type="button" class="back-link-btn" onclick="window.gameApp.goToScreen('landing')">
               ◀ RETURN TO TITLE
@@ -622,7 +589,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="js/helix7-mascot.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@13.3.0/dist/bundle/index.umd.min.js"></script>
   <script src="js/cloud-sync.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/cases-data.js"></script>
   <script src="js/minigames.js"></script>

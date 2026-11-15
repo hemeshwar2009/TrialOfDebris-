@@ -106,7 +106,7 @@ Matches the retro cybernetic pixel interface from the mission briefing specifica
 
 Mission progress syncs to the **TrialOfDebris** Supabase project, so it survives clearing the browser's storage.
 
-* Each visitor is signed in **anonymously** — no account or password needed.
+* Visitors can play straight away as a **guest** (anonymous session — no account needed), or **create an account** to keep progress across devices.
 * Solved missions are stored in the `player_progress` table, one row per player. **Row-level security** lets each player read and write only their own row.
 * The browser's `localStorage` stays as an offline fallback — the game plays the same if Supabase can't be reached.
 * The header pill shows the status: `☁ CLOUD: CONNECTING`, `☁ CLOUD: SAVED` or `☁ CLOUD: OFFLINE`.
@@ -115,7 +115,17 @@ Files:
 * [`js/cloud-sync.js`](js/cloud-sync.js) — the Supabase connection. It uses the project's **publishable** key, which is safe in a browser because access is limited by row-level security.
 * [`supabase/player_progress.sql`](supabase/player_progress.sql) — creates the table and policies. To set up a fresh project, run it in the Supabase SQL Editor and turn on **Authentication → Sign In / Providers → Allow anonymous sign-ins**.
 
-> The **Operator Login** card is a themed entry screen: the name typed there is shown in the header, but it does not create a Supabase account. Cloud save works the same for guests and operators.
+### 🔐 Accounts & Passkeys
+
+**Operator Login** is a real account system built on Supabase Auth:
+
+* **Create an account** with a username, email and password (verified by email). Usernames and emails are unique.
+* **Log in** with email + password ("remember me", forgot/reset password), or with a **passkey** — Face ID, Windows Hello, fingerprint or device PIN. Passkeys are verified on the server by the `td-auth` Edge Function; **no face or fingerprint data ever leaves the player's device**.
+* A guest's progress carries into their new account the first time they log in on that browser.
+* The **👤 account panel** lets players change their username and password, add or remove passkeys, log out, or delete their account.
+* **Administrators** get a 🛡 admin console with player stats and can suspend, restore or delete accounts. Admin rights are granted only by the project owner in SQL.
+
+Full setup, security design, test results and browser support: **[docs/ACCOUNTS.md](docs/ACCOUNTS.md)**.
 
 ---
 

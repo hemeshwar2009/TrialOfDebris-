@@ -503,7 +503,10 @@ class SpaceLegacyApp {
       }
     });
 
-    this.initCloudSync();
+    // Cloud save first (signs in the guest or the remembered member), then accounts UI.
+    this.initCloudSync().then(() => {
+      if (window.TDAuth) window.TDAuth.boot();
+    });
   }
 
   getSolvedTotal() {
@@ -521,11 +524,10 @@ class SpaceLegacyApp {
     this.authenticateUser('Guest Investigator', true);
   }
 
+  // Real sign-in lives in js/auth.js (Supabase Auth + passkeys).
   handleAuthSubmit(e) {
     if (e) e.preventDefault();
-    const emailInput = document.getElementById('login-email');
-    const email = emailInput && emailInput.value ? emailInput.value.trim() : 'investigator@nasa.gov';
-    this.authenticateUser(email, false);
+    if (window.TDAuth) window.TDAuth.showAuth('login');
   }
 
   handleGuestLogin() {
@@ -536,6 +538,10 @@ class SpaceLegacyApp {
     if (window.soundEngine && window.soundEngine.playSuccess) {
       window.soundEngine.playSuccess();
     }
+
+    // A logged-in member always plays under their own account name.
+    const member = window.TDAuth && window.TDAuth.isMember() ? window.TDAuth.displayName() : null;
+    if (member) { identifier = member; isGuest = false; }
 
     const rankBadge = document.getElementById('player-rank-pill');
     if (rankBadge) {
