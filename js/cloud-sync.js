@@ -120,6 +120,19 @@
       if (!sessionPromise) {
         sessionPromise = (async () => {
           let { data: { session } } = await c.auth.getSession();
+          if (session) {
+            // A saved session can outlive its account (deleted or removed by an admin).
+            // If the server says the user is gone, drop it and continue as a new guest.
+            // Network errors (no status) keep the session so offline play still works.
+            const { error } = await c.auth.getUser();
+            if (error && [401, 403, 404].includes(error.status)) {
+              await c.auth.signOut({ scope: 'local' }).catch(() => {});
+              // Keep the owner markers: init() then sees the local progress belongs to
+              // a different (gone) member and starts the new guest from scratch.
+              safeDel(localStorage, PROGRESS_KEY);
+              session = null;
+            }
+          }
           if (!session) {
             const { data, error } = await c.auth.signInAnonymously();
             if (error) throw error;
