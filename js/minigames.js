@@ -1857,8 +1857,11 @@ class OrbitalSlingshotGame {
     this.container = container;
     this.onWin = onWin;
     this.caseData = caseData;
-    this.angle = 8; // degrees (-25 to 25)
-    this.deltaV = 1650; // m/s (1000 to 2200)
+    // Start off-target every time so the player has to tune both sliders
+    // (winning window: angle 0–12°, Δv 1530–1770 m/s).
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    this.angle = pick([-22, -18, -14, 20, 24]); // degrees (-25 to 25)
+    this.deltaV = pick([1150, 1225, 1300, 1975, 2050, 2125]); // m/s (1000 to 2300)
     this.targetDeltaV = 1650;
     this.isWon = false;
     this.isSimulating = false;
@@ -1869,6 +1872,7 @@ class OrbitalSlingshotGame {
     this.render();
     this.initCanvas();
     this.draw();
+    this.checkPrediction(); // show the real predicted orbit for the starting values
   }
 
   render() {
@@ -1888,7 +1892,7 @@ class OrbitalSlingshotGame {
         <div class="mg-hud-row">
           <div class="mg-stat-box">
             <span class="mg-stat-label">APPROACH ANGLE</span>
-            <span id="slingshot-angle-val" class="mg-stat-val">+${this.angle}°</span>
+            <span id="slingshot-angle-val" class="mg-stat-val">${this.angle > 0 ? '+' : ''}${this.angle}°</span>
           </div>
           <div class="mg-stat-box">
             <span class="mg-stat-label">RETRO-BURN DELTA-V</span>
@@ -1896,7 +1900,7 @@ class OrbitalSlingshotGame {
           </div>
           <div class="mg-stat-box">
             <span class="mg-stat-label">PREDICTED ORBIT</span>
-            <span id="slingshot-orbit-status" class="mg-stat-val text-green">STABLE SCIENCE ORBIT</span>
+            <span id="slingshot-orbit-status" class="mg-stat-val">—</span>
           </div>
         </div>
 
