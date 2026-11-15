@@ -78,6 +78,31 @@
 @keyframes mgLostIn { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .mg-lost-overlay { animation: none; } }
 
+/* 5. Wrong verdicts don't solve the case (js/app.js submitHypothesis):
+   the rejected option is crossed out and an explanation appears. */
+.hypo-card.rejected {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #7f1d1d !important;
+  background: rgba(69, 10, 10, 0.25) !important;
+}
+.hypo-card.rejected .hypo-text { text-decoration: line-through; text-decoration-color: rgba(239, 68, 68, 0.7); }
+.hypo-card.rejected .hypo-radio { color: #f87171; }
+.hypo-feedback {
+  margin-top: 16px;
+  padding: 11px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border-cyan);
+  background: rgba(8, 47, 73, 0.45);
+  color: var(--cyan-light);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.hypo-feedback[hidden] { display: none; }
+.hypo-feedback[data-kind="error"] { border-color: #ef4444; background: rgba(127, 29, 29, 0.35); color: #fecaca; }
+.hypo-feedback strong { color: #fca5a5; font-weight: normal; font-family: var(--font-silk); letter-spacing: 1px; }
+
 /* 4. No sideways scrolling: decorative debris may orbit past the edge but is clipped.
    overflow-x: clip doesn't create a scroll container, so sticky/fixed elements keep working. */
 html, body { overflow-x: hidden; }

@@ -1061,6 +1061,7 @@ class SpaceLegacyApp {
   populateHypotheses() {
     const list = document.getElementById('hypotheses-list');
     if (!list) return;
+    this.showHypoFeedback('', 'info');
 
     list.innerHTML = this.currentCase.hypotheses.map(h => `
       <div class="hypo-card" id="hypo-card-${h.id}" onclick="window.gameApp.selectHypothesis('${h.id}')">
@@ -1071,6 +1072,9 @@ class SpaceLegacyApp {
   }
 
   selectHypothesis(hypoId) {
+    // Options already ruled out by a rejected verdict can't be picked again.
+    const picked = document.getElementById(`hypo-card-${hypoId}`);
+    if (picked && picked.classList.contains('rejected')) return;
     this.selectedHypoId = hypoId;
     window.soundEngine.playTone(650, 0.04);
 
@@ -1139,25 +1143,57 @@ class SpaceLegacyApp {
     }, 1200);
   }
 
+  // Inline message under the hypothesis list (replaces alert pop-ups).
+  showHypoFeedback(html, kind) {
+    let box = document.getElementById('hypo-feedback');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'hypo-feedback';
+      box.className = 'hypo-feedback';
+      box.setAttribute('role', 'alert');
+      const list = document.getElementById('hypotheses-list');
+      if (list) list.insertAdjacentElement('afterend', box);
+    }
+    box.dataset.kind = kind || 'info';
+    box.innerHTML = html;
+    box.hidden = !html;
+  }
+
   submitHypothesis() {
     if (!this.selectedHypoId) {
-      alert('Please select a hypothesis to submit your verdict!');
+      this.showHypoFeedback('Select a hypothesis first, then submit your verdict.', 'info');
       return;
     }
 
     const hypo = this.currentCase.hypotheses.find(h => h.id === this.selectedHypoId);
     if (!hypo) return;
 
-    window.soundEngine.playSuccess();
-
-    if (hypo.correct) {
-      if (this.bb8Bot) {
-        this.bb8Bot.say("WHEEE-CHIRP! Case closed! Hypothesis confirmed! Declassified NASA engineering debrief unlocked!", "happy");
-      }
-    } else {
+    // A wrong verdict doesn't solve the case: explain why, rule that option out,
+    // and let the investigator try again. Nothing is unlocked or saved.
+    if (!hypo.correct) {
+      window.soundEngine.playTone(180, 0.18);
       if (this.bb8Bot) {
         this.bb8Bot.say("BOOP-BZZT! Inconsistent telemetry! Review the hardware clues and re-evaluate your hypothesis!", "curious");
       }
+      const card = document.getElementById(`hypo-card-${hypo.id}`);
+      if (card) {
+        card.classList.remove('selected');
+        card.classList.add('rejected');
+        card.setAttribute('aria-disabled', 'true');
+        const radio = document.getElementById(`hypo-radio-${hypo.id}`);
+        if (radio) radio.textContent = '✕';
+      }
+      this.selectedHypoId = null;
+      const why = String(hypo.explanation || '').replace(/^INCORRECT:\s*/i, '');
+      const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      this.showHypoFeedback(`<strong>⚠ VERDICT REJECTED.</strong> ${esc(why)} Review the blueprint and evidence, then try another hypothesis.`, 'error');
+      return;
+    }
+
+    window.soundEngine.playSuccess();
+    this.showHypoFeedback('', 'info');
+    if (this.bb8Bot) {
+      this.bb8Bot.say("WHEEE-CHIRP! Case closed! Hypothesis confirmed! Declassified NASA engineering debrief unlocked!", "happy");
     }
 
     // Mark as solved in progress for this destination & tier
@@ -1183,9 +1219,7 @@ class SpaceLegacyApp {
     const destLevelNum = tierOffset + this.currentCase.level;
 
     document.getElementById('debrief-case-title').textContent = `${destName} MISSION ${destLevelNum}/12 SOLVED: ${this.currentCase.title.toUpperCase()}`;
-    document.getElementById('debrief-verdict-tag').textContent = hypo.correct 
-      ? '✓ HISTORICAL VERDICT CONFIRMED' 
-      : '⚠ REVISED BY INVESTIGATION BOARD';
+    document.getElementById('debrief-verdict-tag').textContent = '✓ HISTORICAL VERDICT CONFIRMED';
     document.getElementById('debrief-score-text').textContent = `VERDICT EXPLANATION: ${hypo.explanation}`;
 
     document.getElementById('debrief-proven').textContent = debrief.whatInvestigatorsProved;
