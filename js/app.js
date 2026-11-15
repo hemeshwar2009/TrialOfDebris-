@@ -26,6 +26,9 @@ class BB8CompanionController {
     this.isTyping = false;
     this.isHoloVisible = true;
     this.isBusyAction = false;
+    // Chat box behaviour: auto-hide after speaking; stay closed if the player closed it.
+    this.userClosedHolo = false;
+    this.holoHideTimer = null;
 
     this.cursorHistory = [];
     this.trackingTimer = null;
@@ -300,7 +303,10 @@ class BB8CompanionController {
 
   toggleHolo() {
     if (!this.holoBox) return;
+    clearTimeout(this.holoHideTimer);
     this.isHoloVisible = !this.isHoloVisible;
+    // Closing with ✕ is a choice: keep it closed until the player clicks HELIX-7.
+    this.userClosedHolo = !this.isHoloVisible;
     if (this.isHoloVisible) {
       this.holoBox.classList.remove('minimized');
       if (this.widget) this.widget.classList.add('bb8-beam-active');
@@ -323,7 +329,24 @@ class BB8CompanionController {
 
     const tip = this.tips[this.tipIndex % this.tips.length];
     this.tipIndex++;
+    this.userClosedHolo = false; // clicking the droid always opens the chat again
     this.say(tip, "happy");
+  }
+
+  // Hide the chat box once the player has had time to read it, so it doesn't sit
+  // on top of clues and buttons. Waits while the pointer is over the box.
+  scheduleHoloHide(message) {
+    clearTimeout(this.holoHideTimer);
+    const small = window.innerWidth < 1100;
+    const delay = Math.max(small ? 4500 : 7000, message.length * (small ? 45 : 60));
+    const hide = () => {
+      if (!this.holoBox || this.holoBox.classList.contains('minimized')) return;
+      if (this.holoBox.matches(':hover') || this.isTyping) { this.holoHideTimer = setTimeout(hide, 1500); return; }
+      this.holoBox.classList.add('minimized');
+      this.isHoloVisible = false;
+      if (this.widget) this.widget.classList.remove('bb8-beam-active');
+    };
+    this.holoHideTimer = setTimeout(hide, delay);
   }
 
   say(message, mood = "chirp") {
@@ -335,14 +358,15 @@ class BB8CompanionController {
       if (mood === 'happy') this.mascot3D.jumpAndSpin();
     }
 
-    // Ensure holo box is visible
-    if (this.holoBox && this.holoBox.classList.contains('minimized')) {
+    // Show the holo box — unless the player closed it (then HELIX-7 just animates).
+    clearTimeout(this.holoHideTimer);
+    if (this.holoBox && this.holoBox.classList.contains('minimized') && !this.userClosedHolo) {
       this.holoBox.classList.remove('minimized');
       this.isHoloVisible = true;
     }
 
     // Trigger flashlight switch-on flick
-    if (this.widget) {
+    if (this.widget && !this.userClosedHolo) {
       this.widget.classList.remove('bb8-beam-active');
       void this.widget.offsetWidth; // force reflow
       this.widget.classList.add('bb8-beam-active');
@@ -398,6 +422,7 @@ class BB8CompanionController {
         if (this.mascot3D) {
           this.mascot3D.setTalking(false);
         }
+        this.scheduleHoloHide(message);
       }
     }, 22);
   }

@@ -1,0 +1,87 @@
+/* ========================================================
+   UX FIXES (found during a live walkthrough, Nov 2026)
+   Kept in one file so they're easy to carry into future builds.
+   ======================================================== */
+
+/* 1. HELIX-7 must not block clicks on the page.
+   The 150×180 canvas is mostly empty space, so it ignores clicks; only a
+   body-sized target (#helix7-hit) catches click / drag / double-click. */
+.helix7-droid-container,
+#helix7-canvas {
+  pointer-events: none !important;
+}
+.helix7-hit {
+  position: absolute;
+  left: 27%;
+  width: 46%;
+  top: 10%;
+  height: 84%;
+  border-radius: 45% 45% 40% 40%;
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+}
+.helix7-widget.is-dragging .helix7-hit { cursor: grabbing; }
+/* Keep the hover "lift" now that the container itself ignores the pointer */
+.helix7-droid-container:has(.helix7-hit:hover) {
+  transform: translateY(-4px) scale(1.05);
+}
+
+/* Smaller droid on laptops/tablets/phones so it covers less of the page */
+@media (max-width: 1100px) {
+  .helix7-droid-container { width: 104px !important; height: 125px !important; }
+  #helix7-canvas { width: 104px !important; height: 125px !important; }
+  .helix7-widget { right: 10px !important; bottom: 10px !important; }
+  .helix7-widget .bb8-holo-box { bottom: 128px !important; }
+  .helix7-widget.dock-top .bb8-holo-box { top: 130px !important; }
+}
+
+/* Let the last buttons on every screen scroll clear of the droid */
+.screen-view:not(.landing-screen):not(.login-screen) {
+  padding-bottom: 150px;
+}
+
+/* 2. HELIX-7's chat box: narrower on small screens so it covers less
+   (it also auto-hides after speaking and stays closed when you close it — js/app.js). */
+@media (max-width: 760px) {
+  .bb8-holo-box { width: 260px !important; }
+  .bb8-holo-body { max-height: 96px; overflow-y: auto; }
+}
+/* While it's showing, only its ✕ and 💬 buttons catch clicks; everything else
+   in the box lets clicks fall through to the page. (Drag HELIX-7 itself to move both.) */
+.bb8-holo-box,
+.bb8-holo-header,
+.bb8-holo-body,
+.bb8-holo-footer {
+  pointer-events: none !important;
+}
+.bb8-holo-box:not(.minimized) .bb8-holo-actions,
+.bb8-holo-box:not(.minimized) .bb8-icon-btn {
+  pointer-events: auto !important;
+}
+
+/* 3. Solar mini-game: "power lost" overlay with retry (js/minigames.js) */
+.canvas-wrap { position: relative; }
+.mg-lost-overlay {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  background: rgba(7, 3, 20, 0.88);
+  text-align: center; padding: 16px;
+  animation: mgLostIn 0.3s ease-out;
+}
+.mg-lost-overlay h4 {
+  font-family: var(--font-pixel); font-size: 13px; color: #fca5a5; letter-spacing: 1px; margin: 0;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+}
+.mg-lost-overlay p {
+  font-family: var(--font-mono); font-size: 14px; color: var(--text-lavender); max-width: 440px; margin: 0; line-height: 1.45;
+}
+@keyframes mgLostIn { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .mg-lost-overlay { animation: none; } }
+
+/* 4. No sideways scrolling: decorative debris may orbit past the edge but is clipped.
+   overflow-x: clip doesn't create a scroll container, so sticky/fixed elements keep working. */
+html, body { overflow-x: hidden; }
+@supports (overflow-x: clip) {
+  html, body { overflow-x: clip; }
+}

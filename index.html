@@ -6,6 +6,7 @@
   <title>AFTERLIGHT - NASA Space Legacy Forensic Archive</title>
   <link rel="stylesheet" href="css/retro-theme.css">
   <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/ux-fixes.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛰️</text></svg>">
 </head>
 <body>
@@ -582,6 +583,9 @@
     <!-- 3D Three.js Mascot Canvas (150×180 px transparent container) -->
     <div id="helix7-droid-container" class="helix7-droid-container" title="Click & drag anywhere on screen to place · Click to chat!">
       <canvas id="helix7-canvas" width="150" height="180"></canvas>
+      <!-- Click/drag target covering only the droid's body, so the empty space
+           around it lets clicks reach the page underneath (css/ux-fixes.css) -->
+      <div id="helix7-hit" class="helix7-hit" title="Click to chat · drag to move · double-click to follow"></div>
     </div>
   </aside>
 

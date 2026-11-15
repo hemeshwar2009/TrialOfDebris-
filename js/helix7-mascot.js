@@ -126,6 +126,10 @@ class Helix7Mascot {
     window.addEventListener('mousemove', this.onMouseMove, { passive: true });
     this.canvas.addEventListener('click', this.onCanvasClick);
     this.canvas.addEventListener('dblclick', this.onCanvasDblClick);
+    // The canvas itself ignores clicks (css/ux-fixes.css); this body-sized target
+    // receives them instead so buttons behind the droid's empty space stay clickable.
+    const hit = document.getElementById('helix7-hit');
+    if (hit) hit.addEventListener('click', this.onCanvasClick);
     if (this.container) {
       this.container.addEventListener('dblclick', this.onCanvasDblClick);
     }

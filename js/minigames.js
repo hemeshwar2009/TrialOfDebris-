@@ -89,6 +89,7 @@ class SunHunterGame {
     this.angle = 0; // -45 to 45
     this.targetSunAngle = 0;
     this.isWon = false;
+    this.isLost = false;
 
     this.render();
     this.initCanvas();
@@ -191,7 +192,7 @@ class SunHunterGame {
       const dt = (time - lastTime) / 1000;
       lastTime = time;
 
-      if (!this.isWon) {
+      if (!this.isWon && !this.isLost) {
         // Sun angle wanders slowly
         this.targetSunAngle = Math.sin(time / 2000) * 35;
 
@@ -222,6 +223,8 @@ class SunHunterGame {
         if (this.power >= 100) {
           this.isWon = true;
           this.onWin();
+        } else if (this.power <= 0) {
+          this.showPowerLost();
         }
       }
 
@@ -229,6 +232,34 @@ class SunHunterGame {
       this.animFrame = requestAnimationFrame(loop);
     };
     this.animFrame = requestAnimationFrame(loop);
+  }
+
+  // Battery hit zero: tell the player (it's what happened to Opportunity) and offer a retry.
+  showPowerLost() {
+    this.isLost = true;
+    if (window.soundEngine && window.soundEngine.playTone) window.soundEngine.playTone(160, 0.25);
+    const wrap = this.container.querySelector('.canvas-wrap');
+    if (!wrap || wrap.querySelector('.mg-lost-overlay')) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'mg-lost-overlay';
+    overlay.setAttribute('role', 'alert');
+    overlay.innerHTML = `
+      <h4>⚠ POWER LOST — ROVER SILENT</h4>
+      <p>The battery hit zero. That's exactly what happened to Opportunity in June 2018. Tip: keep the panels pointed at the sun and purge dust often.</p>
+      <button type="button" class="retro-btn pulse-btn sm-btn">↻ RETRY</button>`;
+    overlay.querySelector('button').onclick = () => this.retry();
+    wrap.appendChild(overlay);
+    overlay.querySelector('button').focus();
+  }
+
+  retry() {
+    this.power = 30;
+    this.dustLevel = 25;
+    this.angle = 0;
+    this.isLost = false;
+    const overlay = this.container.querySelector('.mg-lost-overlay');
+    if (overlay) overlay.remove();
+    if (window.soundEngine && window.soundEngine.playSelect) window.soundEngine.playSelect();
   }
 
   draw(time) {
