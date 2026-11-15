@@ -110,6 +110,8 @@ An automated end-to-end suite ([`tests/auth-test.js`](../tests/auth-test.js), Pu
 - passkey button disabled with a fallback hint on browsers without WebAuthn
 - replayed challenge refused
 
+The same 43 checks also passed against the **live GitHub Pages site** (passkeys bound to `hemeshwar2009.github.io`), plus: all 24 cases and mini-games still open; a guest's progress carries into their account on login; account deletion requires typing DELETE, removes the account and its data, and the deleted account can no longer log in; no JavaScript errors.
+
 Also verified by hand: real verification email arrives and its link activates the account; the trigger creates the profile with the chosen username.
 
 **Not yet tested** (needs the owner's action): the admin console end-to-end (grant yourself admin first), and email flows at volume (needs custom SMTP).
