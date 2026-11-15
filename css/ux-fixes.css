@@ -45,7 +45,6 @@
    (it also auto-hides after speaking and stays closed when you close it — js/app.js). */
 @media (max-width: 760px) {
   .bb8-holo-box { width: 260px !important; }
-  .bb8-holo-body { max-height: 96px; overflow-y: auto; }
 }
 /* While it's showing, only its ✕ and 💬 buttons catch clicks; everything else
    in the box lets clicks fall through to the page. (Drag HELIX-7 itself to move both.) */
