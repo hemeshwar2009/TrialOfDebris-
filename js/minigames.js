@@ -3,12 +3,104 @@
  * Interactive, retro-styled detective action puzzles that teach hardware mechanisms silently.
  */
 
+/**
+ * "MISSION LOST" pop-up content for every mini-game.
+ * Each entry teaches the science concept behind the failure. The real-mission
+ * paragraph in the pop-up comes from the case's own historicalDebrief text
+ * (cases-data.js), so no new historical claims are made here.
+ *   reasons:  why the player lost (key passed by the game)
+ *   concept:  the general science / engineering idea
+ *   tip:      how to win next time
+ *   timer:    [seconds, label] for puzzle games that are lost when time runs out
+ */
+const MG_LOSS = {
+  sun_hunter: {
+    reasons: { power: 'The battery hit zero — the rover went silent.' },
+    concept: 'Solar panels only make power when they face the Sun and stay clean. Thick dust in the air (high opacity, τ) and dust on the panels both cut the light. Below a minimum charge a rover can\'t run its heaters, and its cold electronics stop working.',
+    tip: 'Tilt toward the sun as it moves and purge dust often — dust builds up fast.',
+  },
+  unit_converter: {
+    reasons: { timeout: 'The orbit-insertion burn started with the wrong numbers — the orbiter dived too deep into the atmosphere.' },
+    concept: 'Units must match. 1 pound-force-second = 4.45 newton-seconds. If one program reports thruster pushes in one unit and another reads them as a different unit, every correction is mis-sized, and small errors pile up over months into a big trajectory error.',
+    tip: 'Convert every telemetry packet to metric (×4.45) before the countdown ends.',
+    timer: [30, 'ORBIT INSERTION BURN IN'],
+  },
+  touchdown_sensor: {
+    reasons: { engines_cut: 'A false "touchdown" signal shut the descent engines off while the lander was still in the air.' },
+    concept: 'Sensors can produce false readings, called transients. Flight software must "debounce" them — ignore a signal unless it is real and steady — or it can act on a glitch. A spurious "we\'ve landed" signal can cut the engines too early.',
+    tip: 'Purge every transient spike before the lander drops below 40 m.',
+  },
+  lifeboat_power: {
+    reasons: { timeout: 'Carbon dioxide built up before the lifeboat was reconfigured.' },
+    concept: 'Batteries are a fixed budget: current (amps) × time. In an emergency you power only what keeps the crew alive and in contact. Astronauts breathe out CO₂; lithium-hydroxide canisters absorb it — without a working scrubber, CO₂ rises to dangerous levels.',
+    tip: 'Shut down the non-essential loads, keep life support and radio on, connect the CO₂ scrubber, and stay at or under 15 amps.',
+    timer: [45, 'CO₂ REACHES DANGER LEVEL IN'],
+  },
+  spectrometer_hunter: {
+    reasons: { timeout: 'The observation window closed before the water-ice signature was confirmed.' },
+    concept: 'Molecules absorb light at specific wavelengths, leaving dips ("absorption bands") in a spectrum — a chemical fingerprint. Water shows absorption near 1.45 µm and 1.95 µm in the near-infrared.',
+    tip: 'Sweep the slider to 1.45 µm or 1.95 µm and confirm the band quickly.',
+    timer: [35, 'OBSERVATION WINDOW CLOSES IN'],
+  },
+  lunar_lander: {
+    reasons: {
+      too_fast: 'The lander hit the ground too fast and crushed its landing struts.',
+      missed_pad: 'The lander came down off the safe landing zone, into rough terrain.',
+      tilt: 'The lander touched down tilted too far and tipped over.',
+    },
+    concept: 'Gravity never stops pulling. The engine has to cancel both the falling speed and the sideways drift. A safe touchdown needs low vertical and horizontal speed, an upright attitude, and a flat, clear spot — with fuel to spare.',
+    tip: 'Burn early to slow your fall, level out before touchdown, and arrive over the pad slowly.',
+  },
+  asteroid_dodge: {
+    reasons: { hull: 'Debris strikes destroyed the probe\'s hull.' },
+    concept: 'In space even tiny particles travel at kilometres per second, so they carry enormous energy. Spacecraft survive dust and micrometeoroids with shielding, careful trajectories and by limiting time in debris-rich regions.',
+    tip: 'Keep moving, use the shield pulse when rocks cluster, and grab data packets between waves.',
+  },
+  orbital_slingshot: {
+    reasons: {
+      escape: 'The braking burn was too small — the spacecraft flew past the planet and escaped.',
+      impact: 'The braking burn was too large — the spacecraft dropped too low into the atmosphere.',
+      eccentric: 'The burn missed the target corridor — the spacecraft ended up in the wrong orbit.',
+    },
+    concept: 'To be captured into orbit a spacecraft must fire its engine to slow down by just the right amount (Δv) at the right angle. Too little and gravity can\'t hold it; too much or the wrong angle and it falls too low or ends up in the wrong orbit.',
+    tip: 'Use the orbit preview: aim for an approach angle near 6° and a Δv near 1,650 m/s before firing.',
+  },
+  rover_drive: {
+    reasons: {
+      sand: 'The rover\'s wheels dug into soft soil and it got stuck.',
+      rocks: 'Sharp rocks tore up the rover\'s wheels.',
+    },
+    concept: 'Loose, soft soil can\'t support a rover\'s weight — wheels dig in and spin in place. Sharp, wind-carved rocks can puncture thin aluminium wheels. Rover drivers plan routes around both and watch wheel slip as they drive.',
+    tip: 'Steer around the sand patches and rock fields — the slower, longer route is the safer one.',
+  },
+  circuit_patch: {
+    reasons: { miswired: 'A jumper was patched to the wrong relay and the circuit overloaded.' },
+    concept: 'Every wire has a job. Connecting power, timing and data lines to the wrong place can overload circuits or make flight software stall. Engineers check every connection against the schematic before powering up.',
+    tip: 'Match each terminal\'s function to the socket that needs it (power → heater, watchdog → timer, mutex → CPU, RF → transceiver).',
+  },
+  memory_decrypt: {
+    reasons: { timeout: 'The ground-station pass ended before the corrupted memory was repaired.' },
+    concept: 'Radiation in space can flip bits in computer memory (a 0 becomes a 1). Parity bits and checksums detect the damage, and engineers upload corrected bytes before the spacecraft acts on bad commands.',
+    tip: 'Cycle only the faulty bytes until the checksum reaches 100%, then commit.',
+    timer: [45, 'COMMAND UPLINK WINDOW CLOSES IN'],
+  },
+  radio_tuner: {
+    reasons: { timeout: 'The faint signal faded before the receiver locked on.' },
+    concept: 'A ground receiver must match the spacecraft\'s carrier frequency and phase to pull a weak signal out of noise. Deep Space Network antennas "lock" onto the carrier — if they\'re off, the data turns into static.',
+    tip: 'Tune frequency first until the waves match in speed, then shift phase until they line up.',
+    timer: [40, 'SIGNAL FADES IN'],
+  },
+};
+
 class MiniGameManager {
   constructor(containerId, onComplete) {
     this.container = document.getElementById(containerId);
     this.onComplete = onComplete;
     this.activeGame = null;
     this.animFrame = null;
+    this.lastType = null;
+    this.lastCase = null;
+    this.countdown = null;
   }
 
   stop() {
@@ -16,6 +108,8 @@ class MiniGameManager {
       cancelAnimationFrame(this.animFrame);
       this.animFrame = null;
     }
+    this.clearCountdown();
+    this.closeLoss();
     if (this.activeGame && this.activeGame.destroy) {
       this.activeGame.destroy();
     }
@@ -23,8 +117,108 @@ class MiniGameManager {
     this.container.innerHTML = '';
   }
 
+  // ---------- "Mission lost" pop-up ----------
+  showLoss(type, reasonKey) {
+    const info = MG_LOSS[type];
+    const game = this.activeGame;
+    if (!info || !game || game.isWon || game.lossShown) return;
+    game.isLost = true;
+    game.lossShown = true;
+    this.clearCountdown();
+    try { window.soundEngine.playError(); } catch (e) {}
+
+    const c = this.lastCase || {};
+    const esc = (s) => String(s || '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    const real = c.historicalDebrief && c.historicalDebrief.whatInvestigatorsProved;
+    const what = info.reasons[reasonKey] || Object.values(info.reasons)[0];
+
+    this.closeLoss();
+    const modal = document.createElement('div');
+    modal.className = 'mg-loss-modal';
+    modal.id = 'mg-loss-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'mg-loss-title');
+    modal.innerHTML = `
+      <div class="mg-loss-card">
+        <div class="mg-loss-badge">⚠ MISSION LOST</div>
+        <h3 id="mg-loss-title" class="mg-loss-title">${esc(what)}</h3>
+        <section class="mg-loss-sec concept">
+          <h4>🔬 THE SCIENCE</h4>
+          <p>${esc(info.concept)}</p>
+        </section>
+        ${real ? `<section class="mg-loss-sec real">
+          <h4>🛰 THE REAL MISSION${c.title ? ' · ' + esc(c.title.split(':')[0]) : ''}</h4>
+          <p>${esc(real)}</p>
+        </section>` : ''}
+        <p class="mg-loss-tip"><strong>TIP:</strong> ${esc(info.tip)}</p>
+        <div class="mg-loss-actions">
+          <button type="button" class="retro-btn pulse-btn" data-act="retry">↻ TRY AGAIN</button>
+          <button type="button" class="retro-btn" data-act="review">🔍 REVIEW EVIDENCE</button>
+        </div>
+      </div>`;
+    modal.querySelector('[data-act="retry"]').onclick = () => this.retry();
+    modal.querySelector('[data-act="review"]').onclick = () => {
+      this.closeLoss();
+      if (window.gameApp && window.gameApp.switchGameTab) window.gameApp.switchGameTab('clues');
+    };
+    modal.addEventListener('keydown', (e) => { if (e.key === 'Escape') modal.querySelector('[data-act="review"]').click(); });
+    document.body.appendChild(modal);
+    setTimeout(() => { const b = modal.querySelector('[data-act="retry"]'); if (b) b.focus(); }, 50);
+
+    if (window.bb8Bot && window.bb8Bot.say) {
+      window.bb8Bot.say('BOOP-BZZT! Mission lost — but that\'s how real engineers learned! Read the science, then try again!', 'curious');
+    }
+  }
+
+  closeLoss() {
+    const m = document.getElementById('mg-loss-modal');
+    if (m) m.remove();
+  }
+
+  retry() {
+    this.closeLoss();
+    if (this.lastType) this.launch(this.lastType, this.lastCase);
+  }
+
+  // ---------- Countdown for puzzle games ----------
+  startCountdown(type) {
+    this.clearCountdown();
+    const info = MG_LOSS[type];
+    if (!info || !info.timer) return;
+    let left = info.timer[0];
+    const label = info.timer[1];
+    const bar = document.createElement('div');
+    bar.className = 'mg-countdown';
+    bar.id = 'mg-countdown';
+    bar.setAttribute('role', 'timer');
+    const paint = () => {
+      const m = Math.floor(left / 60), s = String(left % 60).padStart(2, '0');
+      bar.innerHTML = `<span>⏱ ${label}</span><strong>${m}:${s}</strong>`;
+      bar.classList.toggle('urgent', left <= 10);
+    };
+    paint();
+    this.container.parentElement.insertBefore(bar, this.container);
+    this.countdown = setInterval(() => {
+      const g = this.activeGame;
+      if (!g || g.isWon || g.isLost) { this.clearCountdown(); return; }
+      left -= 1;
+      paint();
+      if (left <= 0) this.showLoss(type, 'timeout');
+    }, 1000);
+  }
+
+  clearCountdown() {
+    if (this.countdown) clearInterval(this.countdown);
+    this.countdown = null;
+    const bar = document.getElementById('mg-countdown');
+    if (bar) bar.remove();
+  }
+
   launch(type, caseData) {
     this.stop();
+    this.lastType = type;
+    this.lastCase = caseData;
     window.soundEngine.playSelect();
 
         switch (type) {
@@ -67,9 +261,14 @@ class MiniGameManager {
       default:
         this.activeGame = new SunHunterGame(this.container, () => this.handleSuccess(caseData), caseData);
     }
+    // Games report a loss with this.onLose('reasonKey'); puzzle games also get a countdown.
+    const gameType = MG_LOSS[type] ? type : 'sun_hunter';
+    if (this.activeGame) this.activeGame.onLose = (reason) => this.showLoss(gameType, reason);
+    this.startCountdown(gameType);
   }
 
   handleSuccess(caseData) {
+    this.clearCountdown();
     window.soundEngine.playSuccess();
     if (this.onComplete) {
       this.onComplete(caseData);
@@ -234,32 +433,10 @@ class SunHunterGame {
     this.animFrame = requestAnimationFrame(loop);
   }
 
-  // Battery hit zero: tell the player (it's what happened to Opportunity) and offer a retry.
+  // Battery hit zero → shared "mission lost" pop-up (MiniGameManager.showLoss).
   showPowerLost() {
     this.isLost = true;
-    if (window.soundEngine && window.soundEngine.playTone) window.soundEngine.playTone(160, 0.25);
-    const wrap = this.container.querySelector('.canvas-wrap');
-    if (!wrap || wrap.querySelector('.mg-lost-overlay')) return;
-    const overlay = document.createElement('div');
-    overlay.className = 'mg-lost-overlay';
-    overlay.setAttribute('role', 'alert');
-    overlay.innerHTML = `
-      <h4>⚠ POWER LOST — ROVER SILENT</h4>
-      <p>The battery hit zero. That's exactly what happened to Opportunity in June 2018. Tip: keep the panels pointed at the sun and purge dust often.</p>
-      <button type="button" class="retro-btn pulse-btn sm-btn">↻ RETRY</button>`;
-    overlay.querySelector('button').onclick = () => this.retry();
-    wrap.appendChild(overlay);
-    overlay.querySelector('button').focus();
-  }
-
-  retry() {
-    this.power = 30;
-    this.dustLevel = 25;
-    this.angle = 0;
-    this.isLost = false;
-    const overlay = this.container.querySelector('.mg-lost-overlay');
-    if (overlay) overlay.remove();
-    if (window.soundEngine && window.soundEngine.playSelect) window.soundEngine.playSelect();
+    if (this.onLose) this.onLose('power');
   }
 
   draw(time) {
@@ -560,7 +737,7 @@ class TouchdownSensorGame {
 
   startSimulation() {
     this.timer = setInterval(() => {
-      if (this.isWon) return;
+      if (this.isWon || this.isLost) return;
 
       this.altitude = Math.max(0, this.altitude - 4);
       const altReadout = document.getElementById('alt-readout');
@@ -578,10 +755,13 @@ class TouchdownSensorGame {
         clearInterval(this.timer);
         window.soundEngine.playSuccess();
         this.onWin();
-      } else if (this.altitude <= 20 && this.filteredCount < this.targetFilters) {
-        // Boost back up so player gets another chance
-        this.altitude = 80;
-        window.soundEngine.playError();
+      } else if (this.altitude <= 40 && this.filteredCount < this.targetFilters) {
+        // Unfiltered transient read as "touchdown" → engines cut while still airborne.
+        clearInterval(this.timer);
+        const eng = document.getElementById('engine-readout');
+        if (eng) eng.textContent = 'STATUS: ENGINES CUT (FALSE TOUCHDOWN)';
+        this.isLost = true;
+        if (this.onLose) this.onLose('engines_cut');
       }
     }, 400);
   }
@@ -1049,18 +1229,19 @@ class LunarLanderArcadeGame {
       } else {
         // Crash
         let reason = "EXCESS DESCENT VELOCITY CRUSHED STRUTS!";
-        if (!onPad) reason = "MISSED PAD! ROLLED INTO BOULDER CRATER!";
-        else if (!safeAngle) reason = "LANDER TILT EXCEEDED ROLL MARGIN!";
-        this.crash(reason);
+        let reasonKey = 'too_fast';
+        if (!onPad) { reason = "MISSED PAD! ROLLED INTO BOULDER CRATER!"; reasonKey = 'missed_pad'; }
+        else if (!safeAngle) { reason = "LANDER TILT EXCEEDED ROLL MARGIN!"; reasonKey = 'tilt'; }
+        this.crash(reason, reasonKey);
       }
     }
 
     this.updateHUD();
   }
 
-  crash(reason) {
+  crash(reason, reasonKey) {
     this.isCrashed = true;
-    this.statusMsg = `⚠️ ${reason} RE-ENGAGING ATTITUDE CONTROLLERS...`;
+    this.statusMsg = `⚠️ ${reason}`;
     this.statusClass = "text-magenta";
     window.soundEngine.playGlitch();
 
@@ -1076,12 +1257,9 @@ class LunarLanderArcadeGame {
       });
     }
 
-    setTimeout(() => {
-      this.ship = { x: 75, y: 45, vx: 1.1, vy: 0.2, angle: 0, fuel: 100 };
-      this.isCrashed = false;
-      this.statusMsg = "ATTITUDE RESTORED · COMMENCE RETRY DESCENT";
-      this.statusClass = "text-cyan";
-    }, 1500);
+    // Let the explosion play, then show the "mission lost" pop-up (Try again relaunches).
+    this.isLost = true;
+    setTimeout(() => { if (this.onLose) this.onLose(reasonKey || 'too_fast'); }, 900);
   }
 
   updateHUD() {
@@ -1449,7 +1627,7 @@ class AsteroidDodgeGame {
   }
 
   update() {
-    if (this.isWon) return;
+    if (this.isWon || this.isLost) return;
 
     if (this.shieldCooldown > 0) this.shieldCooldown--;
     if (this.invulnerableTimer > 0) this.invulnerableTimer--;
@@ -1493,10 +1671,12 @@ class AsteroidDodgeGame {
         this.asteroids.splice(i, 1);
 
         if (this.hull <= 0) {
-          // Reset hull
-          this.hull = 3;
-          this.invulnerableTimer = 100;
-          this.packetsCollected = Math.max(0, this.packetsCollected - 1);
+          // Hull destroyed → "mission lost" pop-up (Try again relaunches).
+          this.hull = 0;
+          this.isLost = true;
+          this.updateHUD && this.updateHUD();
+          if (this.onLose) this.onLose('hull');
+          return;
         }
         continue;
       }
@@ -1827,8 +2007,10 @@ class OrbitalSlingshotGame {
           setTimeout(() => this.onWin(), 1200);
           return;
         } else {
-          window.soundEngine.playError();
-          if (btn) btn.disabled = false;
+          // Wrong burn → "mission lost" pop-up explaining which way it went wrong.
+          const key = this.deltaV < 1400 ? 'escape' : (this.deltaV > 1900 ? 'impact' : 'eccentric');
+          this.isLost = true;
+          if (this.onLose) this.onLose(key);
           return;
         }
       }
@@ -1930,6 +2112,10 @@ class RoverDriveGame {
     this.destination = { x: 535, y: 130, r: 36, name: 'HOME PLATE SOLAR RIDGE' };
     this.tracks = [];
     this.isWon = false;
+    this.isLost = false;
+    this.sandFrames = 0;      // consecutive frames bogged down in sand (~60 per second)
+    this.rockHits = 0;        // separate rock strikes
+    this.wasOnRock = false;
     this.animFrame = null;
     this.statusText = "NAVIGATE ROVER TO SOLAR RECHARGE RIDGE";
     this.statusClass = "text-cyan";
@@ -2034,7 +2220,7 @@ class RoverDriveGame {
   }
 
   update() {
-    if (this.isWon) return;
+    if (this.isWon || this.isLost) return;
 
     if (this.keys.left) this.rover.angle -= 0.045;
     if (this.keys.right) this.rover.angle += 0.045;
@@ -2062,6 +2248,18 @@ class RoverDriveGame {
     if (hitRock) {
       targetSpeed = -0.5;
       window.soundEngine.playGlitch();
+    }
+
+    // Losing: bogged down in sand for ~4 s, or 3 separate rock strikes.
+    this.sandFrames = inSand ? this.sandFrames + 1 : 0;
+    if (hitRock && !this.wasOnRock) this.rockHits++;
+    this.wasOnRock = hitRock;
+    if (this.sandFrames > 240 || this.rockHits >= 3) {
+      this.isLost = true;
+      this.statusText = this.rockHits >= 3 ? 'WHEELS DAMAGED — DRIVE HALTED' : 'EMBEDDED IN SOFT SOIL';
+      this.statusClass = 'text-magenta';
+      if (this.onLose) this.onLose(this.rockHits >= 3 ? 'rocks' : 'sand');
+      return;
     }
 
     this.rover.speed += (targetSpeed - this.rover.speed) * 0.1;
@@ -2309,8 +2507,9 @@ class CircuitWirePatchGame {
       window.soundEngine.playSuccess();
       this.onWin();
     } else {
-      window.soundEngine.playError();
-      alert('CIRCUIT OVERLOAD: One or more jumper wires are patched to mismatched voltage relays! Check schematic assignments.');
+      // Miswired → "mission lost" pop-up instead of a browser alert.
+      this.isLost = true;
+      if (this.onLose) this.onLose('miswired');
     }
   }
 

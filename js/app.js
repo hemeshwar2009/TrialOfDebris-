@@ -649,6 +649,9 @@ class SpaceLegacyApp {
   goToScreen(screenId) {
     window.soundEngine.playClick();
 
+    // Leaving the case screen stops any running mini-game (and its countdown / pop-up).
+    if (screenId !== 'game' && this.miniGameManager) this.miniGameManager.stop();
+
     const screens = ['landing', 'login', 'tree', 'destination', 'depth', 'levels', 'game'];
     screens.forEach(s => {
       const el = document.getElementById(`screen-${s}`);

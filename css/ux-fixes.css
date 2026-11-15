@@ -59,24 +59,70 @@
   pointer-events: auto !important;
 }
 
-/* 3. Solar mini-game: "power lost" overlay with retry (js/minigames.js) */
-.canvas-wrap { position: relative; }
-.mg-lost-overlay {
-  position: absolute; inset: 0; z-index: 5;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
-  background: rgba(7, 3, 20, 0.88);
-  text-align: center; padding: 16px;
-  animation: mgLostIn 0.3s ease-out;
+/* 3. "MISSION LOST" pop-up shared by all 12 mini-games (js/minigames.js → showLoss) */
+.mg-loss-modal {
+  position: fixed; inset: 0; z-index: 9500;
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px;
+  background: rgba(3, 1, 8, 0.78);
+  backdrop-filter: blur(3px);
+  animation: mgFadeIn 0.2s ease-out;
+  overflow-y: auto;
 }
-.mg-lost-overlay h4 {
-  font-family: var(--font-pixel); font-size: 13px; color: #fca5a5; letter-spacing: 1px; margin: 0;
-  text-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+.mg-loss-card {
+  width: 100%; max-width: 560px; max-height: calc(100vh - 36px); overflow-y: auto;
+  background: linear-gradient(180deg, #1a0710 0%, var(--bg-card) 38%);
+  border: 2px solid #ef4444;
+  border-radius: 8px;
+  box-shadow: 0 0 40px rgba(239, 68, 68, 0.35), 0 0 70px rgba(88, 44, 209, 0.3), inset 0 0 22px rgba(239, 68, 68, 0.08);
+  padding: 22px 22px 20px;
+  animation: mgPop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.mg-lost-overlay p {
-  font-family: var(--font-mono); font-size: 14px; color: var(--text-lavender); max-width: 440px; margin: 0; line-height: 1.45;
+.mg-loss-badge {
+  display: inline-block;
+  font-family: var(--font-pixel); font-size: 10px; letter-spacing: 2px;
+  color: #fff; background: #b91c1c; border: 1px solid #fca5a5;
+  padding: 6px 10px; border-radius: 3px; margin-bottom: 12px;
+  animation: mgBlink 1.2s steps(2) 3;
 }
-@keyframes mgLostIn { from { opacity: 0; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .mg-lost-overlay { animation: none; } }
+.mg-loss-title {
+  font-family: var(--font-silk); font-size: 15px; line-height: 1.45; color: #fecaca;
+  margin: 0 0 14px; letter-spacing: 0.5px;
+}
+.mg-loss-sec {
+  border: 1px solid var(--border-secondary); border-left-width: 3px; border-radius: 4px;
+  padding: 10px 12px; margin-bottom: 10px; background: rgba(7, 3, 20, 0.55);
+}
+.mg-loss-sec.concept { border-left-color: var(--cyan-neon); }
+.mg-loss-sec.real { border-left-color: var(--amber-pixel); }
+.mg-loss-sec h4 {
+  font-family: var(--font-silk); font-size: 9.5px; letter-spacing: 1px; margin: 0 0 6px;
+  color: var(--cyan-neon);
+}
+.mg-loss-sec.real h4 { color: var(--amber-pixel); }
+.mg-loss-sec p { font-family: var(--font-mono); font-size: 14px; line-height: 1.5; color: #e2e8f0; margin: 0; }
+.mg-loss-tip { font-family: var(--font-mono); font-size: 13.5px; color: #86efac; margin: 4px 0 16px; line-height: 1.45; }
+.mg-loss-tip strong { font-family: var(--font-silk); font-weight: normal; font-size: 10px; letter-spacing: 1px; margin-right: 4px; }
+.mg-loss-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.mg-loss-actions .retro-btn { flex: 1 1 180px; justify-content: center; }
+@keyframes mgPop { 0% { opacity: 0; transform: scale(0.6) translateY(30px); } 100% { opacity: 1; transform: none; } }
+@keyframes mgFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mgBlink { 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) {
+  .mg-loss-modal, .mg-loss-card, .mg-loss-badge { animation: none; }
+}
+
+/* Countdown bar for the puzzle mini-games */
+.mg-countdown {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  margin: 0 0 10px; padding: 8px 12px;
+  border: 1px solid var(--border-primary); border-radius: 4px;
+  background: rgba(17, 9, 48, 0.75);
+  font-family: var(--font-silk); font-size: 9.5px; letter-spacing: 1px; color: var(--text-lavender);
+}
+.mg-countdown strong { font-family: var(--font-pixel); font-size: 13px; color: var(--amber-pixel); font-weight: normal; font-variant-numeric: tabular-nums; }
+.mg-countdown.urgent { border-color: #ef4444; }
+.mg-countdown.urgent strong { color: #f87171; animation: mgBlink 1s steps(2) infinite; }
 
 /* 5. Wrong verdicts don't solve the case (js/app.js submitHypothesis):
    the rejected option is crossed out and an explanation appears. */
