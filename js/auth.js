@@ -83,6 +83,8 @@
     const m = (error && (error.message || error.error_description || String(error))) || 'Something went wrong.';
     if (/invalid login credentials/i.test(m)) return 'Wrong email or password.';
     if (/email not confirmed/i.test(m)) return 'Please verify your email first — check your inbox for the link.';
+    // Supabase's email quota (verification / reset emails) is separate from login throttling.
+    if (/email rate limit/i.test(m)) return "We can't send emails right now — the archive's email limit has been reached. Please try again later, or keep playing as a guest (your progress is saved).";
     if (/rate limit|too many/i.test(m)) return 'Too many attempts. Please wait a minute and try again.';
     if (/password should be|weak password/i.test(m)) return m;
     if (/same.*password|different from the old/i.test(m)) return 'New password must be different from your current one.';
